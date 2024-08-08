@@ -1,12 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>FatherFrostApp</title>
-    <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
-    <script src="app.js" defer></script> 
-</head>
+  </head>
 <body>
     <a-scene mindar-image="imageTargetSrc: ./targets.mind;" 
              color-space="sRGB" 
@@ -15,18 +10,18 @@
              device-orientation-permission-ui="enabled: false">
 
         <a-assets>
-            
-            <video id="myVideo" src=".video.mp4" autoplay="true" loop="true"></video>
+            <video id="myVideo" src="./video.mp4" autoplay muted loop></video>
         </a-assets>
 
         <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 
         <a-entity mindar-image-target="targetIndex: 0">
-            
-            <a-plane src="#myVideo" position="0 0 0.1" height="0.4" width="0.6"></a-plane> 
-
-            <a-plane id="goToPageButton" position="0 0.3 0.1" height="0.1" width="0.3" color="#0000FF"></a-plane>
+            <a-plane src="#myVideo" position="0 0 0.1" height="0.7" width="0.7"></a-plane> 
+            <a-plane id="goToPageButton" position="0 -0.5 0.1" height="0.1" width="0.3" color="#0000FF"></a-plane>
         </a-entity>
     </a-scene>
+    <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
+    <script src="app.js" defer></script> 
 </body>
 </html>
