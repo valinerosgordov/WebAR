@@ -1,25 +1,27 @@
 <!DOCTYPE html>
 <html>
 <head>
-  </head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Mind AR Video App</title>
+</head>
 <body>
-    <a-scene mindar-image="imageTargetSrc: ./targets.mind;" 
-             color-space="sRGB" 
-             renderer="colorManagement: true, physicallyCorrectLights" 
-             vr-mode-ui="enabled: false" 
-             device-orientation-permission-ui="enabled: false">
-
+    <a-scene 
+        mindar-image="imageTargetSrc: ./targets.mind;" 
+        renderer="colorManagement: true, physicallyCorrectLights"
+        vr-mode-ui="enabled: false" 
+        device-orientation-permission-ui="enabled: false"
+    >
         <a-assets>
-            <video id="myVideo" src="./video.mp4" autoplay muted loop></video>
+            <video id="myVideo" src="./video.mp4" preload="auto" muted loop playsinline webkit-playsinline></video>
         </a-assets>
 
         <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 
         <a-entity mindar-image-target="targetIndex: 0">
-            <a-plane src="#myVideo" position="0 0 0.1" height="0.7" width="0.7"></a-plane> 
-            <a-plane id="goToPageButton" position="0 -0.5 0.1" height="0.1" width="0.3" color="#0000FF"></a-plane>
+            <a-plane src="#myVideo" position="0 0 0.1" height="0.7" width="0.7"></a-plane>
         </a-entity>
     </a-scene>
+
     <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
     <script src="app.js" defer></script> 
