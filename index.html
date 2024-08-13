@@ -6,7 +6,7 @@
   <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
   <style>
-    .error-message { /* Style for error messages */
+    .error-message { 
       position: absolute;
       top: 50%;
       left: 50%;
@@ -17,17 +17,28 @@
       border-radius: 5px;
       font-family: sans-serif;
     }
+    #countdown {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 4em;
+      color: white;
+      font-weight: bold;
+    }
   </style>
 </head>
 <body>
   <div id="errorMessage" class="error-message" style="display: none;"></div> 
+  <div id="countdown">8+</div> 
 
   <a-scene 
-    mindar-image="imageTargetSrc: targets.mind " 
+    mindar-image="imageTargetSrc: targets.mind" 
     color-space="sRGB" 
     renderer="colorManagement: true, physicallyCorrectLights" 
     vr-mode-ui="enabled: false" 
     device-orientation-permission-ui="enabled: false"
+    style="display: none;"
   >
     <a-assets>
       <video id="myVideo" autoplay="true" loop="true" webkit-playsinline playsinline muted crossorigin="anonymous" src="myvideo.mp4"></video>
@@ -45,7 +56,24 @@
     </a-entity>
 
     <script>
-      // ... (error handling and feature detection from previous example)
+      // Error Handling
+      function showError(message) {
+        document.getElementById('errorMessage').textContent = message;
+        document.getElementById('errorMessage').style.display = 'block';
+      }
+
+      // Feature detection for WebXR
+      if (navigator.xr) {
+        // Check if Mind AR loaded successfully
+        document.querySelector('a-scene').addEventListener('loaded', () => {
+          if (!window.MINDAR) {
+            showError("Error: Mind AR failed to load. Check console for details.");
+            console.error("Mind AR is not available on the window object.");
+          }
+        }); 
+      } else {
+        showError("WebXR is not supported on your device. Try a different browser or device.");
+      }
 
       // Get the video element
       const video = document.getElementById('myVideo');
@@ -54,7 +82,7 @@
       const targetEl = document.querySelector('a-entity[mindar-image-target]');
       targetEl.addEventListener('targetFound', () => {
         console.log('Target Found!'); 
-        video.play(); // Start playing the video
+        video.play(); 
       });
 
       // Optional: Pause video when target is lost
@@ -62,6 +90,21 @@
         console.log('Target Lost');
         video.pause(); 
       });
+
+      // Countdown Logic
+      const countdownEl = document.getElementById('countdown');
+      const sceneEl = document.querySelector('a-scene'); 
+
+      let count = 8;
+      const countdownInterval = setInterval(() => {
+        countdownEl.textContent = `${count--}+`;
+
+        if (count < 0) {
+          clearInterval(countdownInterval);
+          countdownEl.style.display = 'none';
+          sceneEl.style.display = 'block'; 
+        }
+      }, 1000); 
     </script>
 
   </a-scene>
