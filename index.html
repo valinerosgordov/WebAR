@@ -30,7 +30,7 @@
 </head>
 <body>
   <div id="errorMessage" class="error-message" style="display: none;"></div> 
-  <div id="countdown">8+</div> 
+  <div id="countdown">0+</div> 
 
   <a-scene 
     mindar-image="imageTargetSrc: targets.mind" 
@@ -38,10 +38,10 @@
     renderer="colorManagement: true, physicallyCorrectLights" 
     vr-mode-ui="enabled: false" 
     device-orientation-permission-ui="enabled: false"
-    style="display: none;"
+    style="display: none;" 
   >
     <a-assets>
-      <video id="myVideo" autoplay="true" loop="true" webkit-playsinline playsinline muted crossorigin="anonymous" src="myvideo.mp4"></video>
+      <video id="myVideo" autoplay="true" loop="true" webkit-playsinline playsinline muted crossorigin="anonymous" src="kontivideo.mp4"></video>
     </a-assets>
 
     <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
@@ -91,22 +91,15 @@
         video.pause(); 
       });
 
-      // Countdown Logic
+      // Static "0+" Display Logic 
       const countdownEl = document.getElementById('countdown');
       const sceneEl = document.querySelector('a-scene'); 
 
-      let count = 8;
-      const countdownInterval = setInterval(() => {
-        countdownEl.textContent = `${count--}+`;
-
-        if (count < 0) {
-          clearInterval(countdownInterval);
-          countdownEl.style.display = 'none';
-          sceneEl.style.display = 'block'; 
-        }
-      }, 1000); 
+      setTimeout(() => {
+        countdownEl.style.display = 'none';
+        sceneEl.style.display = 'block'; 
+      }, 8000); 
     </script>
-
   </a-scene>
 </body>
 </html>
