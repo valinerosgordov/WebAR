@@ -25,58 +25,12 @@
       font-size: 4em;
       color: white;
       font-weight: bold;
-      z-index: 101; /* Make sure it's on top of the white screen */
-    }
-    #popup {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      background-color: rgba(255, 255, 255, 0.8); /* White with transparency */
-      padding: 20px;
-      border-radius: 5px;
-      box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.2); /* Shadow */
-      display: none; /* Hide initially */
-      z-index: 10; /* Ensure popup appears above other content */
-    }
-    #whiteScreen { /* Add this style for the white screen */
-      position: fixed; /* Make it cover the whole viewport */
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background-color: white;
-      z-index: 100; /* Ensure it's on top of other elements */
-    }
-    #userInput {
-      border: 2px solid #C0C0C0; /* Gray border */
-      border-radius: 5px; /* Rounded corners */
-      padding: 10px;
-      font-size: 16px;
-      width: 100%;
-      box-sizing: border-box; /* Ensure padding is included in width */
-    }
-    #submitButton {
-      background-color: #007bff; /* Blue button */
-      color: white;
-      border: none;
-      padding: 10px 20px;
-      border-radius: 5px;
-      cursor: pointer;
-      font-size: 16px;
     }
   </style>
 </head>
 <body>
   <div id="errorMessage" class="error-message" style="display: none;"></div> 
   <div id="countdown">0+</div> 
-  <div id="whiteScreen"></div> 
-  <div id="popup">
-    <h2>С Новым Годом</h2>
-    <p>Введите ваше имя!</p>
-    <input type="text" id="userInput" placeholder="Enter your text...">
-    <button id="submitButton">Продолжить</button>
-  </div>
 
   <a-scene 
     mindar-image="imageTargetSrc: targets.mind" 
@@ -87,7 +41,7 @@
     style="display: none;" 
   >
     <a-assets>
-      <video id="myVideo" autoplay webkit-playsinline playsinline crossorigin="anonymous" src="kontivideo.mp4"></video> 
+      <video id="myVideo" autoplay="true" loop="true" webkit-playsinline playsinline muted crossorigin="anonymous" src="kontivideo.mp4"></video>
     </a-assets>
 
     <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
@@ -103,13 +57,14 @@
 
     <script>
       // Error Handling
-      const errorMessageEl = document.getElementById('errorMessage');
       function showError(message) {
-        errorMessageEl.textContent = message;
-        errorMessageEl.style.display = 'block';
+        document.getElementById('errorMessage').textContent = message;
+        document.getElementById('errorMessage').style.display = 'block';
       }
 
+      // Feature detection for WebXR
       if (navigator.xr) {
+        // Check if Mind AR loaded successfully
         document.querySelector('a-scene').addEventListener('loaded', () => {
           if (!window.MINDAR) {
             showError("Error: Mind AR failed to load. Check console for details.");
@@ -120,58 +75,30 @@
         showError("WebXR is not supported on your device. Try a different browser or device.");
       }
 
-      // Elements
-      const countdownEl = document.getElementById('countdown');
-      const sceneEl = document.querySelector('a-scene'); 
+      // Get the video element
       const video = document.getElementById('myVideo');
-      const popupEl = document.getElementById('popup');
-      const submitButton = document.getElementById('submitButton');
-      const userInput = document.getElementById('userInput');
+
+      // Event Listener for when the target is found
       const targetEl = document.querySelector('a-entity[mindar-image-target]');
-      const whiteScreenEl = document.getElementById('whiteScreen'); // Get the white screen element
-
-      // Functions
-      function showPopup() {
-        popupEl.style.display = 'block';
-      }
-
-      // Display "0+" for 8 seconds on a white screen
-      setTimeout(() => {
-        countdownEl.style.display = 'none'; // Hide the countdown
-        whiteScreenEl.style.display = 'none'; // Hide the white screen
-
-        navigator.mediaDevices.getUserMedia({ video: true })
-          .then(() => {
-            setTimeout(() => {
-              sceneEl.style.display = 'block'; 
-            }, 8000); 
-          })
-          .catch((err) => {
-            console.error("Error accessing camera:", err);
-            showError("Camera access is required. Please allow permission to continue.");
-          });
-      }, 8000); // Wait 8 seconds
-
-      // Video and Target Events
-      video.addEventListener('ended', showPopup);
-
       targetEl.addEventListener('targetFound', () => {
         console.log('Target Found!'); 
         video.play(); 
       });
 
+      // Optional: Pause video when target is lost
       targetEl.addEventListener('targetLost', () => {
         console.log('Target Lost');
         video.pause(); 
       });
 
-      // Form Submission
-      submitButton.addEventListener('click', () => {
-        const text = userInput.value;
-        console.log("User entered:", text); 
-        popupEl.style.display = 'none'; 
-      });
+      // Static "0+" Display Logic 
+      const countdownEl = document.getElementById('countdown');
+      const sceneEl = document.querySelector('a-scene'); 
 
+      setTimeout(() => {
+        countdownEl.style.display = 'none';
+        sceneEl.style.display = 'block'; 
+      }, 8000); 
     </script>
   </a-scene>
 </body>
