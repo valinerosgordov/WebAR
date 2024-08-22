@@ -41,14 +41,11 @@
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      background-color: rgba(255, 255, 255, 0.8); /* White with transparency */
-      padding: 30px;  /* Increased padding */
-      border-radius: 10px; /* More rounded corners */
-      box-shadow: 0px 5px 10px rgba(0, 0, 0, 0.3); /* Stronger shadow */
+      background-color: rgba(255, 255, 255, 0.9);
+      padding: 20px;
+      border-radius: 5px;
       display: none; /* Hide initially */
       z-index: 10; /* Ensure popup appears above other content */
-      width: 300px; /* Larger width */
-      font-family: 'Arial', sans-serif; /* Choose a more festive font */
     }
     #userInput {
       border: 2px solid #C0C0C0; /* Gray border */
@@ -67,12 +64,45 @@
       cursor: pointer;
       font-size: 16px;
     }
+
+    /* Snow Effect */
+    #snow {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 5; /* Make sure it's behind the popup */
+      display: none; /* Initially hide the snow */
+    }
+    .flake {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 15px; <--- Larger snowflakes
+      height: 15px; <--- Larger snowflakes
+      background-color: white;
+      border-radius: 50%;
+      opacity: 0.8;
+      animation: snowFall 3s linear infinite; <--- Faster animation
+    }
+    @keyframes snowFall {
+      0% {
+        transform: translate(0, 0);
+      }
+      100% {
+        transform: translate(calc(var(--random-x) * 100vw), calc(var(--random-y) * 100vh));
+        opacity: 0;
+      }
+    }
   </style>
 </head>
 <body>
   <div id="errorMessage" class="error-message" style="display: none;"></div> 
   <div id="countdown">0+</div> 
   <div id="whiteScreen"></div> 
+  <div id="snow"></div> <--- Snow container
   <div id="popup">
     <h2>С Новым Годом</h2>
     <p>Введите ваше имя!</p>
@@ -89,7 +119,7 @@
     style="display: none;" 
   >
     <a-assets>
-      <video id="myVideo" autoplay="true" loop="true" webkit-playsinline playsinline crossorigin="anonymous" src="kontivideo.mp4"></video> 
+      <video id="myVideo" autoplay="true" webkit-playsinline playsinline crossorigin="anonymous" src="kontivideo.mp4"></video> 
     </a-assets>
 
     <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
@@ -131,6 +161,7 @@
       const popupEl = document.getElementById('popup');
       const submitButton = document.getElementById('submitButton');
       const userInput = document.getElementById('userInput');
+      const snowEl = document.getElementById('snow'); // Get the snow container
 
       // Request camera access
       navigator.mediaDevices.getUserMedia({ video: true })
@@ -164,6 +195,7 @@
 
       // Video and Target Events
       video.addEventListener('ended', () => { 
+        snowEl.style.display = 'none'; // Hide the snow
         popupEl.style.display = 'block'; // Show the popup when the video ends
       }); 
 
@@ -174,6 +206,22 @@
         popupEl.style.display = 'none'; 
       });
 
+      // Create snowflakes
+      function createSnowflakes() {
+        for (let i = 0; i < 500; i++) { // Create 500 snowflakes (10x more)
+          const flake = document.createElement('div');
+          flake.classList.add('flake');
+          flake.style.setProperty('--random-x', Math.random() - 0.5); // Random horizontal offset
+          flake.style.setProperty('--random-y', Math.random() - 0.5); // Random vertical offset
+          snowEl.appendChild(flake);
+        }
+      }
+
+      // Show snow when the video ends
+      video.addEventListener('ended', () => {
+        snowEl.style.display = 'block';
+        createSnowflakes();
+      });
     </script>
   </a-scene>
 </body>
