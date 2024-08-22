@@ -41,11 +41,14 @@
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      background-color: rgba(255, 255, 255, 0.9);
-      padding: 20px;
-      border-radius: 5px;
+      background-color: rgba(255, 255, 255, 0.8); /* White with transparency */
+      padding: 30px;  /* Increased padding */
+      border-radius: 10px; /* More rounded corners */
+      box-shadow: 0px 5px 10px rgba(0, 0, 0, 0.3); /* Stronger shadow */
       display: none; /* Hide initially */
       z-index: 10; /* Ensure popup appears above other content */
+      width: 300px; /* Larger width */
+      font-family: 'Arial', sans-serif; /* Choose a more festive font */
     }
     #userInput {
       border: 2px solid #C0C0C0; /* Gray border */
@@ -86,7 +89,7 @@
     style="display: none;" 
   >
     <a-assets>
-      <video id="myVideo" autoplay="true" webkit-playsinline playsinline crossorigin="anonymous" src="kontivideo.mp4"></video> 
+      <video id="myVideo" autoplay="true" loop="true" webkit-playsinline playsinline crossorigin="anonymous" src="kontivideo.mp4"></video> 
     </a-assets>
 
     <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
