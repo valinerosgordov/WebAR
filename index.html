@@ -86,7 +86,7 @@
     style="display: none;" 
   >
     <a-assets>
-      <video id="myVideo" loop="true" webkit-playsinline playsinline crossorigin="anonymous" src="kontivideo.mp4"></video> 
+      <video id="myVideo" autoplay="true" webkit-playsinline playsinline crossorigin="anonymous" src="kontivideo.mp4"></video> 
     </a-assets>
 
     <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
@@ -160,7 +160,9 @@
       });
 
       // Video and Target Events
-      video.addEventListener('ended', showPopup); 
+      video.addEventListener('ended', () => { 
+        popupEl.style.display = 'block'; // Show the popup when the video ends
+      }); 
 
       // Form Submission
       submitButton.addEventListener('click', () => {
