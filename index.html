@@ -80,12 +80,12 @@
       position: absolute;
       top: 0;
       left: 0;
-      width: 15px; <--- Larger snowflakes
-      height: 15px; <--- Larger snowflakes
+      width: 15px; 
+      height: 15px; 
       background-color: white;
       border-radius: 50%;
       opacity: 0.8;
-      animation: snowFall 3s linear infinite; <--- Faster animation
+      animation: snowFall 10s linear infinite; 
     }
     @keyframes snowFall {
       0% {
@@ -102,11 +102,11 @@
   <div id="errorMessage" class="error-message" style="display: none;"></div> 
   <div id="countdown">0+</div> 
   <div id="whiteScreen"></div> 
-  <div id="snow"></div> <--- Snow container
+  <div id="snow"></div> 
   <div id="popup">
     <h2>С Новым Годом</h2>
     <p>Введите ваше имя!</p>
-    <input type="text" id="userInput" placeholder="Enter your text...">
+    <input type="text" id="userInput" placeholder="Введите ваше имя...">
     <button id="submitButton">Продолжить</button>
   </div>
 
@@ -119,7 +119,7 @@
     style="display: none;" 
   >
     <a-assets>
-      <video id="myVideo" autoplay="true" webkit-playsinline playsinline crossorigin="anonymous" src="kontivideo.mp4"></video> 
+      <video id="myVideo" autoplay="true"  webkit-playsinline playsinline crossorigin="anonymous" src="kontivideo.mp4"></video> 
     </a-assets>
 
     <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
