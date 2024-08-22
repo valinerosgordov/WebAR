@@ -23,17 +23,62 @@
       left: 50%;
       transform: translate(-50%, -50%);
       font-size: 4em;
-      color: white;
+      color: black; 
       font-weight: bold;
+      z-index: 101; /* Make sure it's on top of the white screen */
+    }
+    #whiteScreen { /* Style for the loading screen */
+      position: fixed; /* Make it cover the whole viewport */
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: white;
+      z-index: 100; /* Ensure it's on top */
+    }
+    #popup {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background-color: rgba(255, 255, 255, 0.9);
+      padding: 20px;
+      border-radius: 5px;
+      display: none; /* Hide initially */
+      z-index: 10; /* Ensure popup appears above other content */
+    }
+    #userInput {
+      border: 2px solid #C0C0C0; /* Gray border */
+      border-radius: 5px; /* Rounded corners */
+      padding: 10px;
+      font-size: 16px;
+      width: 100%;
+      box-sizing: border-box; /* Ensure padding is included in width */
+    }
+    #submitButton {
+      background-color: #007bff; /* Blue button */
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
     }
   </style>
 </head>
 <body>
   <div id="errorMessage" class="error-message" style="display: none;"></div> 
   <div id="countdown">0+</div> 
+  <div id="whiteScreen"></div> 
+  <div id="popup">
+    <h2>С Новым Годом</h2>
+    <p>Введите ваше имя!</p>
+    <input type="text" id="userInput" placeholder="Enter your text...">
+    <button id="submitButton">Продолжить</button>
+  </div>
 
   <a-scene 
-    mindar-image="imageTargetSrc: targets.mind" 
+    mindar-image="imageTargetSrc: targets.mind; maxDetectionRate: 10" 
     color-space="sRGB" 
     renderer="colorManagement: true, physicallyCorrectLights" 
     vr-mode-ui="enabled: false" 
@@ -41,7 +86,7 @@
     style="display: none;" 
   >
     <a-assets>
-      <video id="myVideo" autoplay="true" loop="true" webkit-playsinline playsinline muted crossorigin="anonymous" src="kontivideo.mp4"></video>
+      <video id="myVideo" loop="true" webkit-playsinline playsinline crossorigin="anonymous" src="kontivideo.mp4"></video> 
     </a-assets>
 
     <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
@@ -77,28 +122,53 @@
 
       // Get the video element
       const video = document.getElementById('myVideo');
+      const countdownEl = document.getElementById('countdown');
+      const sceneEl = document.querySelector('a-scene'); 
+      const whiteScreenEl = document.getElementById('whiteScreen');
+      const popupEl = document.getElementById('popup');
+      const submitButton = document.getElementById('submitButton');
+      const userInput = document.getElementById('userInput');
+
+      // Request camera access
+      navigator.mediaDevices.getUserMedia({ video: true })
+        .then(() => {
+          // Camera access granted, continue with the countdown 
+          setTimeout(() => {
+            countdownEl.style.display = 'none';
+            whiteScreenEl.style.display = 'none';
+            sceneEl.style.display = 'block'; 
+          }, 8000); 
+        })
+        .catch((err) => {
+          console.error("Error accessing camera:", err);
+          showError("Camera access is required. Please allow permission to continue.");
+        });
 
       // Event Listener for when the target is found
       const targetEl = document.querySelector('a-entity[mindar-image-target]');
       targetEl.addEventListener('targetFound', () => {
         console.log('Target Found!'); 
+        video.muted = false; // Enable sound
         video.play(); 
       });
 
       // Optional: Pause video when target is lost
       targetEl.addEventListener('targetLost', () => {
         console.log('Target Lost');
+        video.muted = true; // Mute the video
         video.pause(); 
       });
 
-      // Static "0+" Display Logic 
-      const countdownEl = document.getElementById('countdown');
-      const sceneEl = document.querySelector('a-scene'); 
+      // Video and Target Events
+      video.addEventListener('ended', showPopup); 
 
-      setTimeout(() => {
-        countdownEl.style.display = 'none';
-        sceneEl.style.display = 'block'; 
-      }, 8000); 
+      // Form Submission
+      submitButton.addEventListener('click', () => {
+        const text = userInput.value;
+        console.log("User entered:", text); 
+        popupEl.style.display = 'none'; 
+      });
+
     </script>
   </a-scene>
 </body>
