@@ -78,7 +78,7 @@
   </div>
 
   <a-scene 
-    mindar-image="imageTargetSrc: targets.mind; maxDetectionRate: 10" 
+    mindar-image="imageTargetSrc: targets.mind; maxDetectionRate: 5" 
     color-space="sRGB" 
     renderer="colorManagement: true, physicallyCorrectLights" 
     vr-mode-ui="enabled: false" 
@@ -86,7 +86,7 @@
     style="display: none;" 
   >
     <a-assets>
-      <video id="myVideo" autoplay="true"  webkit-playsinline playsinline crossorigin="anonymous" src="kontivideo.mp4"></video> 
+      <video id="myVideo" autoplay="false" preload="metadata"  webkit-playsinline playsinline crossorigin="anonymous" src="kontivideo.mp4"></video> 
     </a-assets>
 
     <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
@@ -116,10 +116,13 @@
       const submitButton = document.getElementById('submitButton');
       const userInput = document.getElementById('userInput');
 
-      // Request camera access
+      // Request camera access and preload video after access is granted
       navigator.mediaDevices.getUserMedia({ video: true })
         .then(() => {
           // Camera access granted, continue with the countdown 
+          video.preload = "auto"; // Start loading the full video
+          video.load();
+
           setTimeout(() => {
             countdownEl.style.display = 'none';
             whiteScreenEl.style.display = 'none';
@@ -131,19 +134,31 @@
           showError("Camera access is required. Please allow permission to continue.");
         });
 
+      // Flag to track if the target is found
+      let targetFound = false;
+
       // Event Listener for when the target is found
       const targetEl = document.querySelector('a-entity[mindar-image-target]');
+
       targetEl.addEventListener('targetFound', () => {
         console.log('Target Found!'); 
+        targetFound = true;
         video.muted = false; // Enable sound
         video.play(); 
       });
 
-      // Optional: Pause video when target is lost
-      targetEl.addEventListener('targetLost', () => {
-        console.log('Target Lost');
-        video.muted = true; // Mute the video
-        video.pause(); 
+      // Update video time to match target visibility
+      sceneEl.addEventListener('mindar-image-track', (event) => {
+        const isTracking = event.detail.tracked; 
+
+        if (isTracking && !targetFound) {
+          video.muted = false; // Unmute when target is tracked again
+          video.currentTime = 0; // Start video from the beginning when target is found
+          targetFound = true;
+        } else if (!isTracking && targetFound) {
+          targetFound = false; // Update the flag to false
+          video.muted = true; // Mute the video when target is lost
+        }
       });
 
       // Video and Target Events
