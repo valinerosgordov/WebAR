@@ -82,7 +82,7 @@
   </div>
 
   <a-scene 
-    mindar-image="imageTargetSrc: targets.mind; maxDetectionRate: 7" 
+    mindar-image="imageTargetSrc: targets.mind; maxDetectionRate: 8" 
     color-space="sRGB" 
     renderer="colorManagement: true, physicallyCorrectLights" 
     vr-mode-ui="enabled: false" 
@@ -100,8 +100,8 @@
       <a-plane 
         id="videoPlane" 
         position="0 0 0" 
-        width="1" 
-        height="0.5625" 
+        width="1.5" 
+        height="1.34" 
         material="shader: flat; src: #myVideo; transparent: true;">
       </a-plane>
     </a-entity>
@@ -148,7 +148,7 @@
     // Previous positions and rotations for smoothing
     let previousPositions = [];
     let previousRotations = [];
-    const smoothingFactor = 5; // Number of frames to average for smoothing
+    const smoothingFactor = 7; // Number of frames to average for smoothing
 
     // Event Listener for when the target is found
     const targetEl = document.querySelector('a-entity[mindar-image-target]');
