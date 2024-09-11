@@ -5,6 +5,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <link type="text/css" rel="stylesheet" href="main.css">
+    <script src="https://cdn.jsdelivr.net/npm/webxr-polyfill@latest/build/webxr-polyfill.min.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
     <style>
@@ -101,8 +102,24 @@
         });
 
         $("#share-button").click(function () {
-            shareImage();
+            shareLink();
         });
+
+        function shareLink() {
+            const shareData = {
+                title: 'Перейди по ссылке!',
+                text: 'C новым годом',
+                url: 'https://www.sharedslam.tryar.ru/' // Replace with your desired URL
+            };
+
+            if (navigator.share) {
+                navigator.share(shareData)
+                    .then(() => console.log('Link shared successfully'))
+                    .catch((error) => console.error('Error sharing link:', error));
+            } else {
+                alert('Your browser does not support the Web Share API.');
+            }
+        }
 
         function arPlace() {
             if (reticle.visible) {
@@ -307,24 +324,6 @@
                 a.click();
                 window.URL.revokeObjectURL(url);
                 document.body.removeChild(a);
-            });
-        }
-
-        function shareImage() {
-            renderer.render(scene, camera);
-            renderer.domElement.toBlob((blob) => {
-                const file = new File([blob], 'ar_image.png', { type: 'image/png' });
-                if (navigator.canShare && navigator.canShare({ files: [file] })) {
-                    navigator.share({
-                        files: [file],
-                        title: 'AR Image',
-                        text: 'Check out this AR image!',
-                    })
-                        .then(() => console.log('Share successful'))
-                        .catch((error) => console.error('Share failed:', error));
-                } else {
-                    alert('Your browser does not support sharing files.');
-                }
             });
         }
     </script>
