@@ -13,6 +13,7 @@
             margin: 0;
             font-family: Arial, sans-serif;
             overflow: hidden;
+            background: none;
         }
         #content {
             position: fixed;
@@ -57,8 +58,7 @@
 </head>
 <body>
     <div id="content">
-        <button type="button" id="place-button">Разместить</button>
-        <button type="button" id="capture-button">Скриншот</button>
+        <button type="button" id="place-button" style="display:none;">Разместить</button>
         <button type="button" id="share-button">Поделиться</button>
         <a href="https://t.me/addstickers/KontiNewyear" target="_blank" id="download-stickers-link">
             <button type="button">СКАЧАТЬ СТИКЕРЫ</button>
@@ -78,6 +78,9 @@
         style="display:none; width: 100%; height: 100%;">
     </model-viewer>
 
+    <!-- Audio Element -->
+    <audio id="placement-sound" src="sound.wav" preload="auto"></audio>
+
     <script type="module">
         import * as THREE from './build/three.module.js';
         import { ARButton } from './jsm/webxr/ARButton.js';
@@ -90,15 +93,14 @@
         let hitTestSource = null;
         let hitTestSourceRequested = false;
 
+        // Audio element for playing sound
+        const placementSound = document.getElementById('placement-sound');
+
         init();
         animate();
 
         $("#place-button").click(function () {
             arPlace();
-        });
-
-        $("#capture-button").click(function () {
-            captureImage();
         });
 
         $("#share-button").click(function () {
@@ -109,7 +111,7 @@
             const shareData = {
                 title: 'Перейди по ссылке!',
                 text: 'C новым годом',
-                url: 'https://konti.digitalmarker.ru/slamshared' // Replace with your desired URL
+                url: 'https://konti.digitalmarker.ru/slamshared'
             };
 
             if (navigator.share) {
@@ -127,6 +129,11 @@
                 current_object.visible = true;
                 document.getElementById('instruction-text').style.display = 'none'; // Hide the instruction text
                 console.log("Model placed at: ", current_object.position);
+                
+                // Play the audio when the model is placed
+                placementSound.play().catch(error => {
+                    console.error("Audio play failed: ", error);
+                });
             } else {
                 console.log("Reticle is not visible. Cannot place the model.");
             }
@@ -168,7 +175,7 @@
             scene = new THREE.Scene();
 
             camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.001, 200);
-            camera.position.set(0, 1.6, 3); // Adjust camera position
+            camera.position.set(0, 1.6, 3);
 
             const directionalLight = new THREE.DirectionalLight(0xdddddd, 1);
             directionalLight.position.set(0, 0, 1).normalize();
@@ -219,43 +226,7 @@
 
             window.addEventListener('resize', onWindowResize, false);
 
-            renderer.domElement.addEventListener('touchstart', onTouchStart, false);
-            renderer.domElement.addEventListener('touchend', onTouchEnd, false);
-            renderer.domElement.addEventListener('touchmove', onTouchMove, false);
-
-            loadModel();  // Load the model initially
-        }
-
-        let touchDown, touchX, touchY, deltaX, deltaY;
-
-        function onTouchStart(e) {
-            e.preventDefault();
-            touchDown = true;
-            touchX = e.touches[0].pageX;
-            touchY = e.touches[0].pageY;
-        }
-
-        function onTouchEnd(e) {
-            e.preventDefault();
-            touchDown = false;
-        }
-
-        function onTouchMove(e) {
-            e.preventDefault();
-            if (!touchDown) return;
-
-            deltaX = e.touches[0].pageX - touchX;
-            deltaY = e.touches[0].pageY - touchY;
-            touchX = e.touches[0].pageX;
-            touchY = e.touches[0].pageY;
-
-            rotateObject();
-        }
-
-        function rotateObject() {
-            if (current_object && reticle.visible) {
-                current_object.rotation.y += deltaX / 100;
-            }
+            loadModel();
         }
 
         function onWindowResize() {
@@ -288,8 +259,8 @@
                         isAR = false;
                         reticle.visible = false;
                         document.getElementById("place-button").style.display = "none";
-                        document.getElementById('instruction-text').style.display = 'none'; // Hide the instruction text
-                        document.getElementById('ar-viewer').style.display = 'block'; // Show model-viewer
+                        document.getElementById('instruction-text').style.display = 'none';
+                        document.getElementById('ar-viewer').style.display = 'block';
                     });
 
                     hitTestSourceRequested = true;
@@ -310,21 +281,6 @@
             }
 
             renderer.render(scene, camera);
-        }
-
-        function captureImage() {
-            renderer.render(scene, camera);
-            renderer.domElement.toBlob((blob) => {
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.style.display = 'none';
-                a.href = url;
-                a.download = 'ar_image.png';
-                document.body.appendChild(a);
-                a.click();
-                window.URL.revokeObjectURL(url);
-                document.body.removeChild(a);
-            });
         }
     </script>
 </body>
