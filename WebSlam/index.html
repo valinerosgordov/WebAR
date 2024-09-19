@@ -75,8 +75,7 @@
         ar
         ar-modes="scene-viewer quick-look"
         camera-controls
-        style="display:none; width: 100%; height: 100%;">
-    </model-viewer>
+        style="display:none; width: 100%; height: 100%;"></model-viewer>
 
     <!-- Audio Element -->
     <audio id="placement-sound" src="sound.wav" preload="auto"></audio>
@@ -92,6 +91,8 @@
         let reticle, pmremGenerator, current_object, controls, isAR = false, envmap;
         let hitTestSource = null;
         let hitTestSourceRequested = false;
+        let animationMixer = null; // Animation mixer
+        const clock = new THREE.Clock(); // Clock for managing animation timing
 
         // Audio element for playing sound
         const placementSound = document.getElementById('placement-sound');
@@ -155,6 +156,13 @@
                         current_object = glb.scene;
                         current_object.visible = false; // Initially hidden
                         scene.add(current_object);
+
+                        // Create Animation Mixer and Play the Animation
+                        if (glb.animations && glb.animations.length > 0) {
+                            animationMixer = new THREE.AnimationMixer(current_object);
+                            const action = animationMixer.clipAction(glb.animations[0]); // Play the first animation
+                            action.play();
+                        }
 
                         const box = new THREE.Box3();
                         box.setFromObject(current_object);
@@ -242,6 +250,12 @@
         }
 
         function render(timestamp, frame) {
+            // Update the mixer for playing animations
+            if (animationMixer) {
+                const delta = clock.getDelta(); // Get time difference between frames
+                animationMixer.update(delta); // Update the mixer with the time delta
+            }
+
             if (frame && isAR) {
                 const referenceSpace = renderer.xr.getReferenceSpace();
                 const session = renderer.xr.getSession();
@@ -260,7 +274,7 @@
                         reticle.visible = false;
                         document.getElementById("place-button").style.display = "none";
                         document.getElementById('instruction-text').style.display = 'none';
-                        document.getElementById('ar-viewer').style.display = 'block';
+                        document.getElementById('ar-viewer').style.display = 'block'; // Show model-viewer again
                     });
 
                     hitTestSourceRequested = true;
