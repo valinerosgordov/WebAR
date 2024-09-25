@@ -85,10 +85,6 @@
     <div id="container"></div>
     <div id="instruction-text">Наведите камеру на горизонтальную плоскость</div>
 
-    <button class="testSoundName">
-        запустить воспроизведение имени
-    </button>
-
 
 
     <model-viewer
@@ -162,9 +158,10 @@
                 current_object.visible = true;
                 document.getElementById('instruction-text').style.display = 'none';
                 console.log("Model placed at: ", current_object.position);
-                placementSound.play().catch(error => {
-                    console.error("Audio play failed: ", error);
-                });
+                // placementSound.play().catch(error => {
+                //     console.error("Audio play failed: ", error);
+                // });
+                fetchData()
             } else {
                 console.log("Reticle is not visible. Cannot place the model.");
             }
@@ -287,16 +284,6 @@
             renderer.render(scene, camera);
         }
 
-        
-        const testBtn = document.querySelector('.testSoundName')
-
-        testBtn.onclick = () => {
-            console.log('test')
-            fetchData();
-        }
-
-        let audioDuration = undefined
-
         async function fetchData() {
             try {
                 const response = await fetch('https://arplatov-6e62e-default-rtdb.firebaseio.com/baseNames.json')
@@ -336,8 +323,6 @@
             }
         }
 
-    
-        // fetchData();
     </script>
 </body>
 </html>
