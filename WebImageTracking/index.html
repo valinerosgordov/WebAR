@@ -88,6 +88,31 @@
             font-family: 'VaccineRegular', sans-serif;
             text-align: center; /* Centering content */
         }
+        .popup-container{
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+        .popup-container p{
+            font-size: 20px;
+        }
+        .popup-container input{
+            width: 100%;
+            font-size: 18px;
+            display: flex;
+            margin-bottom: 14px;
+            border: 1px solid;
+            border-radius: 4px;
+            outline: none;
+            padding: 4px 8px;
+        }
+        .popup-container .nextBtn {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            text-decoration: none;
+        }
 
         #userInput {
             border: 2px solid #C0C0C0;
@@ -100,6 +125,17 @@
             font-family: 'VaccineRegular', sans-serif;
         }
 
+        .nextBtn {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px; /* Adjust padding if needed */
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%; /* Make the button width the same as input */
+            font-family: 'VaccineRegular', sans-serif;
+        }
         #submitButton {
             background-color: #007bff;
             color: white;
@@ -137,11 +173,13 @@
     <div id="whiteScreen"></div> 
     <div id="instruction">Наведите камеру на логотип</div> 
     <div id="popup">
-        <p>Введите ваше имя!</p> 
-        <input type="text" id="userInput" class="inputName" placeholder="">
-        <a href="#" class="nextBtn">
-            <button id="submitButton">Продолжить</button>
-        </a>
+        <div class="popup-container">
+            <p>Введите ваше имя!</p> 
+            <input type="text" class="inputName" placeholder="">
+            <a href="#" class="nextBtn btn">
+                Продолжить
+            </a>
+        </div>
     </div>
      
     <a-scene 
@@ -210,7 +248,7 @@
         const whiteScreenEl = document.getElementById('whiteScreen');
         const popupEl = document.getElementById('popup');
         const submitButton = document.getElementById('submitButton');
-        const userInput = document.getElementById('userInput');
+        // const userInput = document.getElementById('userInput');
         const videoPlane = document.getElementById('videoPlane');
 
         // Request camera access and preload video after access is granted
@@ -288,8 +326,8 @@
 
         // Form Submission
         submitButton.addEventListener('click', () => {
-            const text = userInput.value;
-            console.log("User entered:", text);
+            // const text = userInput.value;
+            // console.log("User entered:", text);
             popupEl.style.display = 'none';
 
 
