@@ -152,7 +152,7 @@
         }
         let soundname= undefined;
 
-        function arPlace() {
+        async function arPlace() {
             if (reticle.visible) {
                 current_object.position.setFromMatrixPosition(reticle.matrix);
                 current_object.visible = true;
@@ -161,7 +161,7 @@
                 // placementSound.play().catch(error => {
                 //     console.error("Audio play failed: ", error);
                 // });
-                fetchData()
+                await fetchData()
             } else {
                 console.log("Reticle is not visible. Cannot place the model.");
             }
