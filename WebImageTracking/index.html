@@ -26,6 +26,15 @@
     <script src="https://cdn.jsdelivr.net/gh/donmccurdy/aframe-extras@v7.0.0/dist/aframe-extras.min.js"></script>
 
     <style>
+        .popup{
+            position: fixed;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 99999;
+        }
         /* Add the Vaccine Regular font */
         @font-face {
             font-family: 'VaccineRegular';
@@ -143,6 +152,13 @@
             <button id="submitButton">Продолжить</button>
         </a>
     </div>
+
+    <div class="popup">
+        <input class="inputName" type="text" placeholder="Кто ты воин?">
+        <a href="#" class="nextBtn">
+            <button id="submitButton">Продолжить</button>
+        </a>
+    </div>
      
     <a-scene 
         mindar-image="imageTargetSrc: targets.mind; maxDetectionRate: 7" 
@@ -170,25 +186,53 @@
     </a-scene>
    
     <script> 
-    
-    async function test() {
-            try {
-                const response = await fetch(
-                    'https://arplatov-6e62e-default-rtdb.firebaseio.com/baseNames.json'
-                )
-                const { Names } = await response.json()
-                console.log(Names )
-            for (var key in Names) {
-            if (Names.hasOwnProperty(key)) {
-          console.log(key + " -> " + Names[key]);
-            }
-         }
 
-            } catch (error) {
-                console.log(error)
-            }
+    let arrayUsers = []
+    const inputName = document.querySelector('.inputName')
+    const nextBtn = document.querySelector('.nextBtn')
+
+    nextBtn.onclick = async () => {
+        console.log('test')
+        await fetchData();
+        nextPage()
+    }
+
+    const nextPage = () => {
+        const name = inputName.value
+        const idxName = arrayUsers.findIndex( i => i.name === name)
+        const url = `https://konti.digitalmarker.ru/slam?${idxName}`
+        nextBtn.href = url
+    }
+
+    async function fetchData() {
+        try {
+            const response = await fetch('https://arplatov-6e62e-default-rtdb.firebaseio.com/baseNames.json')
+            const {Names} = await response.json();
+            arrayUsers = Names            
+        } catch (error) {
+            console.error('Error fetching Names:', error);
         }
-        test()
+    }
+
+    
+    // async function test() {
+    //         try {
+    //             const response = await fetch(
+    //                 'https://arplatov-6e62e-default-rtdb.firebaseio.com/baseNames.json'
+    //             )
+    //             const { Names } = await response.json()
+    //             console.log(Names )
+    //         for (var key in Names) {
+    //         if (Names.hasOwnProperty(key)) {
+    //       console.log(key + " -> " + Names[key]);
+    //         }
+    //      }
+
+    //         } catch (error) {
+    //             console.log(error)
+    //         }
+    //     }
+    //     test()
         
         function showError(message) {
             document.getElementById('errorMessage').textContent = message;

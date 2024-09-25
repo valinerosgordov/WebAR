@@ -8,6 +8,11 @@
     
     <!-- Importing the Vaccine Regular font -->
     <style>
+        .testSoundName {
+            position: relative;
+            display: flex;
+            z-index: 99999;
+        }
         @font-face {
             font-family: 'Vaccine Regular';
             src: url('fonts/Vaccine-Regular.ttf') format('truetype'); /* Update the path as needed */
@@ -80,6 +85,10 @@
     <div id="container"></div>
     <div id="instruction-text">Наведите камеру на горизонтальную плоскость</div>
 
+    <button class="testSoundName">
+        запустить воспроизведение имени
+    </button>
+
 
 
     <model-viewer
@@ -91,7 +100,7 @@
         camera-controls
         style="display:none; width: 100%; height: 100%;"></model-viewer>
 
-    <audio id="placement-sound" src="sound.wav" preload="auto"></audio>
+        <audio id="placement-sound" src="sound.wav" preload="auto"></audio>
 
 
 
@@ -145,7 +154,7 @@
                 alert('Your browser does not support the Web Share API.');
             }
         }
-        const soundname= undefined;
+        let soundname= undefined;
 
         function arPlace() {
             if (reticle.visible) {
@@ -279,7 +288,14 @@
         }
 
         
+        const testBtn = document.querySelector('.testSoundName')
 
+        testBtn.onclick = () => {
+            console.log('test')
+            fetchData();
+        }
+
+        let audioDuration = undefined
 
         async function fetchData() {
             try {
@@ -291,26 +307,37 @@
                 const url = window.location.href
                 const newurl = url.split("?")
                 const idx = newurl[newurl.length-1]
-                console.log(idx)
-                console.log(Names[idx])
                 soundname = Names[idx]?.sound
-                playsoundname()
+
+                console.log(soundname)
+
+                playSound()
+                
             } catch (error) {
                 console.error('Error fetching Names:', error);
             }
+        }
 
+        const playSound = () =>{
+            let audioStart = new Audio(`/slam/firstPart.wav`);
+            let audioName = new Audio(`/slam/audio/speech/${soundname}`);
+            let audioFinaly = new Audio(`/slam/secondPart.wav`);
+
+            audioStart.onloadedmetadata = () => {
+                let durationStart = (audioStart.duration*1000) + 500
+                audioStart.play(); 
+                setTimeout(() => {
+                    let durationName = (audioName.duration*1000) + 200
+                    audioName.play(); 
+                    setTimeout(() => {
+                        audioFinaly.play(); 
+                    }, durationName)  
+                }, durationStart)                 
+            }
         }
-        function playsoundname(){
-            let audio = new Audio(`https://konti.digitalmarker.ru/slam/audio/speech/${soundname}`);
-            console.log();
-            audio.play(); 
-        }
-        
-     
-        
 
     
-        fetchData();
+        // fetchData();
     </script>
 </body>
 </html>
