@@ -4,14 +4,20 @@
     <title>SLamAR</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <link type="text/css" rel="stylesheet" href="main.css">
-    <script src="https://cdn.jsdelivr.net/npm/webxr-polyfill@latest/build/webxr-polyfill.min.js"></script>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-    <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
+    <link rel="stylesheet" href="main.css">
+    
+    <!-- Importing the Vaccine Regular font -->
     <style>
+        @font-face {
+            font-family: 'Vaccine Regular';
+            src: url('fonts/Vaccine-Regular.ttf') format('truetype'); /* Update the path as needed */
+            font-weight: normal;
+            font-style: normal;
+        }
+
         body {
             margin: 0;
-            font-family: Arial, sans-serif;
+            font-family: 'Vaccine Regular', Arial, sans-serif; /* Set font for the body */
             overflow: hidden;
             background: none;
         }
@@ -32,6 +38,7 @@
             color: white;
             cursor: pointer;
             transition: background-color 0.3s;
+            font-family: 'Vaccine Regular', Arial, sans-serif; /* Font for buttons */
         }
         #content button:hover {
             background-color: #0056b3;
@@ -48,6 +55,7 @@
             font-size: 16px;
             display: none;
             text-align: center;
+            font-family: 'Vaccine Regular', Arial, sans-serif; /* Font for instruction text */
         }
         #container {
             position: fixed;
@@ -55,6 +63,9 @@
             height: 100%;
         }
     </style>
+    <script src="https://cdn.jsdelivr.net/npm/webxr-polyfill@latest/build/webxr-polyfill.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
 </head>
 <body>
     <div id="content">
@@ -63,11 +74,12 @@
         <a href="https://t.me/addstickers/KontiNewyear" target="_blank" id="download-stickers-link">
             <button type="button">СКАЧАТЬ СТИКЕРЫ</button>
         </a>
+        <button type="button" id="shop-button">Перейти в магазин Konti</button>
+        <button type="button" id="take-photo-button">Сделать фото</button>
     </div>
     <div id="container"></div>
     <div id="instruction-text">Наведите камеру на горизонтальную плоскость</div>
 
-    <!-- Model Viewer for Cross-Platform AR Support -->
     <model-viewer
         id="ar-viewer"
         src="1.glb"
@@ -77,7 +89,6 @@
         camera-controls
         style="display:none; width: 100%; height: 100%;"></model-viewer>
 
-    <!-- Audio Element -->
     <audio id="placement-sound" src="sound.wav" preload="auto"></audio>
 
     <script type="module">
@@ -91,10 +102,9 @@
         let reticle, pmremGenerator, current_object, controls, isAR = false, envmap;
         let hitTestSource = null;
         let hitTestSourceRequested = false;
-        let animationMixer = null; // Animation mixer
-        const clock = new THREE.Clock(); // Clock for managing animation timing
+        let animationMixer = null;
+        const clock = new THREE.Clock();
 
-        // Audio element for playing sound
         const placementSound = document.getElementById('placement-sound');
 
         init();
@@ -106,6 +116,14 @@
 
         $("#share-button").click(function () {
             shareLink();
+        });
+
+        $("#shop-button").click(function () {
+            window.open('https://your-shop-url.com', '_blank');
+        });
+
+        $("#take-photo-button").click(function () {
+            takePhoto();
         });
 
         function shareLink() {
@@ -128,16 +146,24 @@
             if (reticle.visible) {
                 current_object.position.setFromMatrixPosition(reticle.matrix);
                 current_object.visible = true;
-                document.getElementById('instruction-text').style.display = 'none'; // Hide the instruction text
+                document.getElementById('instruction-text').style.display = 'none';
                 console.log("Model placed at: ", current_object.position);
-                
-                // Play the audio when the model is placed
                 placementSound.play().catch(error => {
                     console.error("Audio play failed: ", error);
                 });
             } else {
                 console.log("Reticle is not visible. Cannot place the model.");
             }
+        }
+
+        function takePhoto() {
+            renderer.toDataURL('image/png').then(function(dataUrl) {
+                const link = document.createElement('a');
+                link.href = dataUrl;
+                link.download = 'photo.png';
+                link.click();
+                console.log("Photo taken and downloaded.");
+            });
         }
 
         function loadModel() {
@@ -154,20 +180,18 @@
                     const loader = new GLTFLoader().setPath('3d/');
                     loader.load("1.glb", function (glb) {
                         current_object = glb.scene;
-                        current_object.visible = false; // Initially hidden
+                        current_object.visible = false;
                         scene.add(current_object);
 
-                        // Create Animation Mixer and Play the Animation
                         if (glb.animations && glb.animations.length > 0) {
                             animationMixer = new THREE.AnimationMixer(current_object);
-                            const action = animationMixer.clipAction(glb.animations[0]); // Play the first animation
+                            const action = animationMixer.clipAction(glb.animations[0]);
                             action.play();
                         }
 
                         const box = new THREE.Box3();
                         box.setFromObject(current_object);
-                        box.getCenter(controls.target); // Use getCenter instead of center
-
+                        box.getCenter(controls.target);
                         controls.update();
                         render();
                     }, undefined, function (error) {
@@ -199,42 +223,38 @@
             container.appendChild(renderer.domElement);
 
             pmremGenerator = new THREE.PMREMGenerator(renderer);
-            pmremGenerator.compileEquirectangularShader();
-
-            controls = new OrbitControls(camera, renderer.domElement);
-            controls.addEventListener('change', render);
-            controls.minDistance = 2;
-            controls.maxDistance = 10;
-            controls.target.set(0, 0, -0.2);
-            controls.enableDamping = true;
-            controls.dampingFactor = 0.05;
-
-            let options = {
-                requiredFeatures: ['hit-test'],
-                optionalFeatures: ['dom-overlay'],
-                domOverlay: { root: document.getElementById('content') }
-            };
-
-            const arButton = ARButton.createButton(renderer, options);
-            document.body.appendChild(arButton);
-
-            arButton.addEventListener('click', () => {
-                isAR = true;
-                document.getElementById('instruction-text').style.display = 'block'; // Show the instruction text
-                document.getElementById('ar-viewer').style.display = 'none'; // Hide model-viewer
-            });
-
-            reticle = new THREE.Mesh(
-                new THREE.RingBufferGeometry(0.15, 0.2, 32).rotateX(-Math.PI / 2),
-                new THREE.MeshBasicMaterial({ color: 0x00ff00 }) // Change reticle color for visibility
-            );
-            reticle.matrixAutoUpdate = false;
-            reticle.visible = false;
-            scene.add(reticle);
-
-            window.addEventListener('resize', onWindowResize, false);
-
             loadModel();
+
+            controller = renderer.xr.getController(0);
+            controller.addEventListener('selectstart', onSelectStart);
+            controller.addEventListener('selectend', onSelectEnd);
+            scene.add(controller);
+
+            document.body.appendChild(ARButton.createButton(renderer));
+            window.addEventListener('resize', onWindowResize);
+        }
+
+        function onSelectStart(event) {
+            const controller = event.target;
+
+            const intersections = getIntersections(controller);
+            if (intersections.length > 0) {
+                arPlace();
+            }
+        }
+
+        function onSelectEnd(event) {}
+
+        function getIntersections(controller) {
+            const tempMatrix = new THREE.Matrix4();
+            const line = new THREE.Line2(new THREE.Vector2(), new THREE.Vector2());
+
+            const raycaster = new THREE.Raycaster();
+            tempMatrix.identity().extractRotation(controller.matrixWorld);
+            raycaster.ray.origin.setFromMatrixPosition(controller.matrixWorld);
+            raycaster.ray.direction.set(0, 0, -1).applyMatrix4(tempMatrix);
+
+            return raycaster.intersectObjects([current_object], false);
         }
 
         function onWindowResize() {
@@ -245,55 +265,11 @@
 
         function animate() {
             renderer.setAnimationLoop(render);
-            requestAnimationFrame(animate);
-            controls.update();
         }
 
-        function render(timestamp, frame) {
-            // Update the mixer for playing animations
-            if (animationMixer) {
-                const delta = clock.getDelta(); // Get time difference between frames
-                animationMixer.update(delta); // Update the mixer with the time delta
-            }
-
-            if (frame && isAR) {
-                const referenceSpace = renderer.xr.getReferenceSpace();
-                const session = renderer.xr.getSession();
-
-                if (!hitTestSourceRequested) {
-                    session.requestReferenceSpace('viewer').then(function (referenceSpace) {
-                        session.requestHitTestSource({ space: referenceSpace }).then(function (source) {
-                            hitTestSource = source;
-                        });
-                    });
-
-                    session.addEventListener('end', function () {
-                        hitTestSourceRequested = false;
-                        hitTestSource = null;
-                        isAR = false;
-                        reticle.visible = false;
-                        document.getElementById("place-button").style.display = "none";
-                        document.getElementById('instruction-text').style.display = 'none';
-                        document.getElementById('ar-viewer').style.display = 'block'; // Show model-viewer again
-                    });
-
-                    hitTestSourceRequested = true;
-                }
-
-                if (hitTestSource) {
-                    const hitTestResults = frame.getHitTestResults(hitTestSource);
-                    if (hitTestResults.length) {
-                        const hit = hitTestResults[0];
-                        document.getElementById("place-button").style.display = "block";
-                        reticle.visible = true;
-                        reticle.matrix.fromArray(hit.getPose(referenceSpace).transform.matrix);
-                    } else {
-                        reticle.visible = false;
-                        document.getElementById("place-button").style.display = "none";
-                    }
-                }
-            }
-
+        function render() {
+            const delta = clock.getDelta();
+            if (animationMixer) animationMixer.update(delta); // Update the animation mixer if it exists
             renderer.render(scene, camera);
         }
     </script>

@@ -14,7 +14,7 @@ class ARButton {
 
 				renderer.xr.setReferenceSpaceType( 'local' );
 				renderer.xr.setSession( session );
-				button.textContent = 'STOP AR';
+				button.textContent = 'Оставить AR';
 
 				currentSession = session;
 
@@ -24,7 +24,7 @@ class ARButton {
 
 				currentSession.removeEventListener( 'end', onSessionEnded );
 
-				button.textContent = 'START AR';
+				button.textContent = 'Включить камеру';
 
 				currentSession = null;
 
@@ -38,7 +38,7 @@ class ARButton {
 			button.style.left = 'calc(50% - 50px)';
 			button.style.width = '100px';
 
-			button.textContent = 'START AR';
+			button.textContent = 'Включить камеру';
 
 			button.onmouseenter = function () {
 
@@ -87,7 +87,7 @@ class ARButton {
 
 			disableButton();
 
-			button.textContent = 'AR NOT SUPPORTED';
+			button.textContent = 'Дополненная реальность не поддерживается на вашем устройстве';
 
 		}
 
@@ -96,10 +96,10 @@ class ARButton {
 			element.style.position = 'absolute';
 			element.style.bottom = '20px';
 			element.style.padding = '12px 6px';
-			element.style.border = '1px solid #fff';
+			element.style.border = '1px solid #000000';
 			element.style.borderRadius = '4px';
 			element.style.background = 'rgba(0,0,0,0.1)';
-			element.style.color = '#fff';
+			element.style.color = '#000000';
 			element.style.font = 'normal 13px sans-serif';
 			element.style.textAlign = 'center';
 			element.style.opacity = '0.5';
@@ -135,7 +135,7 @@ class ARButton {
 			} else {
 
 				message.href = 'https://immersiveweb.dev/';
-				message.innerHTML = 'WEBXR NOT AVAILABLE';
+				message.innerHTML = 'Ваше устройство не поддерживает XR';
 
 			}
 

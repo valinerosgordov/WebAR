@@ -1,230 +1,271 @@
 <!DOCTYPE html>
-<html>
+<html lang="ru">
 <head>
     <!-- Yandex.Metrika counter -->
-<script type="text/javascript" >
-  (function(m,e,t,r,i,k,a){m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
-  m[i].l=1*new Date();
-  for (var j = 0; j < document.scripts.length; j++) {if (document.scripts[j].src === r) { return; }}
-  k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)})
-  (window, document, "script", "https://mc.yandex.ru/metrika/tag.js", "ym");
+    <script type="text/javascript">
+        (function(m,e,t,r,i,k,a){m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
+        m[i].l=1*new Date();
+        for (var j = 0; j < document.scripts.length; j++) {if (document.scripts[j].src === r) { return; }}
+        k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)})
+        (window, document, "script", "https://mc.yandex.ru/metrika/tag.js", "ym");
+        
+        ym(98367916, "init", {
+            clickmap:true,
+            trackLinks:true,
+            accurateTrackBounce:true
+        });
+    </script>
+    <noscript><div><img src="https://mc.yandex.ru/watch/98367916" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
+    <!-- /Yandex.Metrika counter -->
 
-  ym(98367916, "init", {
-       clickmap:true,
-       trackLinks:true,
-       accurateTrackBounce:true
-  });
-</script>
-<noscript><div><img src="https://mc.yandex.ru/watch/98367916" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
-<!-- /Yandex.Metrika counter -->
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>KontiNewYear</title>
-  <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
-  <script src="https://cdn.jsdelivr.net/gh/hiukim/mind-ar-js@1.2.5/dist/mindar-image.aframe.js"></script>
-  <script src="https://cdn.jsdelivr.net/gh/donmccurdy/aframe-extras@v7.0.0/dist/aframe-extras.min.js"></script>
-  <style>
-    .error-message {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      background-color: rgba(255, 0, 0, 0.8);
-      color: rgba(255, 255, 255, 0.995);
-      padding: 1em;
-      border-radius: 5px;
-      font-family: sans-serif;
-    }
-    #countdown {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      font-size: 4em;
-      color: black;
-      font-weight: bold;
-      z-index: 101;
-    }
-    #whiteScreen {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background-color: white;
-      z-index: 100;
-    }
-    #popup {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      background-color: rgba(255, 255, 255, 0.9);
-      padding: 20px;
-      border-radius: 5px;
-      display: none;
-      z-index: 10;
-    }
-    #userInput {
-      border: 2px solid #C0C0C0;
-      border-radius: 5px;
-      padding: 10px;
-      font-size: 16px;
-      width: 100%;
-      box-sizing: border-box;
-    }
-    #submitButton {
-      background-color: #007bff;
-      color: white;
-      border: none;
-      padding: 10px 20px;
-      border-radius: 5px;
-      cursor: pointer;
-      font-size: 16px;
-    }
-  </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>KontiNewYear</title>
+    <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/hiukim/mind-ar-js@1.2.5/dist/mindar-image.aframe.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/donmccurdy/aframe-extras@v7.0.0/dist/aframe-extras.min.js"></script>
+
+    <style>
+        /* Add the Vaccine Regular font */
+        @font-face {
+            font-family: 'VaccineRegular';
+            src: url('fonts/Vaccine-Regular.woff2') format('woff2'),
+                 url('fonts/Vaccine-Regular.woff') format('woff'),
+                 url('fonts/Vaccine-Regular.ttf') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+        }
+
+        /* Apply the font to the body or specific elements */
+        body, #popup, #instruction, #countdown {
+            font-family: 'VaccineRegular', sans-serif;
+        }
+
+        .error-message {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(255, 0, 0, 0.8);
+            color: rgba(255, 255, 255, 0.995);
+            padding: 1em;
+            border-radius: 5px;
+            font-family: 'VaccineRegular', sans-serif;
+        }
+
+        #countdown {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 4em;
+            color: black;
+            font-weight: bold;
+            z-index: 101;
+            font-family: 'VaccineRegular', sans-serif;
+        }
+
+        #whiteScreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: white;
+            z-index: 100;
+        }
+
+        #popup {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(255, 255, 255, 0.9);
+            padding: 20px;
+            border-radius: 5px;
+            display: none;
+            z-index: 10;
+            font-family: 'VaccineRegular', sans-serif;
+            text-align: center; /* Centering content */
+        }
+
+        #userInput {
+            border: 2px solid #C0C0C0;
+            border-radius: 5px;
+            padding: 10px;
+            font-size: 16px;
+            width: 100%;
+            box-sizing: border-box;
+            margin-bottom: 15px; /* Space between input and button */
+            font-family: 'VaccineRegular', sans-serif;
+        }
+
+        #submitButton {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px; /* Adjust padding if needed */
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%; /* Make the button width the same as input */
+            font-family: 'VaccineRegular', sans-serif;
+        }
+
+        #instruction {
+            position: absolute;
+            bottom: 5%;  /* Place the instruction box below the AR tracker */
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(255, 255, 255, 0.9);
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 1.5em;
+            color: black;
+            text-align: center;
+            width: 90%;
+            max-width: 500px;
+            z-index: 102;
+            display: none; /* Initially hidden */
+            font-family: 'VaccineRegular', sans-serif;
+        }
+    </style>
 </head>
 <body>
-  <div id="errorMessage" class="error-message" style="display: none;"></div> 
-  <div id="countdown">0+</div> 
-  <div id="whiteScreen"></div> 
-  <div id="popup">
-    <h2>С Новым Годом</h2>
-    <p>Введите ваше имя!</p>
-    <input type="text" id="userInput" placeholder="">
-    <a href="https://konti.digitalmarker.ru/slam">
-      <button id="submitButton">Продолжить</button>
-    </a>
-  </div>
+    <div id="errorMessage" class="error-message" style="display: none;"></div> 
+    <div id="countdown">0+</div> 
+    <div id="whiteScreen"></div> 
+    <div id="instruction">Наведите камеру на логотип</div> <!-- Instruction Text -->
+    <div id="popup">
+        <p>Введите ваше имя!</p> <!-- Removed the <h2> -->
+        <input type="text" id="userInput" placeholder="">
+        <a href="https://konti.digitalmarker.ru/slam">
+            <button id="submitButton">Продолжить</button>
+        </a>
+    </div>
 
-  <a-scene 
-    mindar-image="imageTargetSrc: targets.mind; maxDetectionRate: 7" 
-    color-space="sRGB" 
-    renderer="colorManagement: true, physicallyCorrectLights" 
-    vr-mode-ui="enabled: false" 
-    device-orientation-permission-ui="enabled: false"
-    style="display: none;">
-    
-    <a-assets>
-      <video id="myVideo" preload="metadata" webkit-playsinline playsinline crossorigin="anonymous" src="konti.mp4"></video> 
-    </a-assets>
+    <a-scene 
+        mindar-image="imageTargetSrc: targets.mind; maxDetectionRate: 7" 
+        color-space="sRGB" 
+        renderer="colorManagement: true, physicallyCorrectLights" 
+        vr-mode-ui="enabled: false" 
+        device-orientation-permission-ui="enabled: false"
+        style="display: none;">
+        
+        <a-assets>
+            <video id="myVideo" preload="metadata" webkit-playsinline playsinline crossorigin="anonymous" src="konti.mp4"></video> 
+        </a-assets>
 
-    <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+        <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 
-    <a-entity mindar-image-target="targetIndex: 0">
-      <a-plane 
-        id="videoPlane" 
-        position="0 0 0" 
-        width="1.5" 
-        height="1.34" 
-        material="shader: flat; src: #myVideo; transparent: true;">
-      </a-plane>
-    </a-entity>
-  </a-scene>
+        <a-entity mindar-image-target="targetIndex: 0">
+            <a-plane 
+                id="videoPlane" 
+                position="0 0 0" 
+                width="1.5" 
+                height="1.34" 
+                material="shader: flat; src: #myVideo; transparent: true;">
+            </a-plane>
+        </a-entity>
+    </a-scene>
 
-  <script>
-    // Error Handling
-    function showError(message) {
-      document.getElementById('errorMessage').textContent = message;
-      document.getElementById('errorMessage').style.display = 'block';
-    }
-
-    // Get the video element
-    const video = document.getElementById('myVideo');
-    const countdownEl = document.getElementById('countdown');
-    const sceneEl = document.querySelector('a-scene');
-    const whiteScreenEl = document.getElementById('whiteScreen');
-    const popupEl = document.getElementById('popup');
-    const submitButton = document.getElementById('submitButton');
-    const userInput = document.getElementById('userInput');
-    const videoPlane = document.getElementById('videoPlane');
-
-    // Request camera access and preload video after access is granted
-    navigator.mediaDevices.getUserMedia({ video: true })
-      .then(() => {
-        // Camera access granted, continue with the countdown
-        video.preload = "auto"; // Start loading the full video
-        video.load();
-
-        setTimeout(() => {
-          countdownEl.style.display = 'none';
-          whiteScreenEl.style.display = 'none';
-          sceneEl.style.display = 'block';
-        }, 8000);
-      })
-      .catch((err) => {
-        console.error("Error accessing camera:", err);
-        showError("Camera access is required. Please allow permission to continue.");
-      });
-
-    // Flag to track if the target is found
-    let targetFound = false;
-
-    // Previous positions and rotations for smoothing
-    let previousPositions = [];
-    let previousRotations = [];
-    const smoothingFactor = 7; // Number of frames to average for smoothing
-    // Event Listener for when the target is found
-    const targetEl = document.querySelector('a-entity[mindar-image-target]');
-
-    targetEl.addEventListener('targetFound', () => {
-      console.log('Target Found!');
-      targetFound = true;
-      // Start playback when the target is found
-      video.play();
-    });
-    // Update video time to match target visibility
-    sceneEl.addEventListener('mindar-image-track', (event) => {
-      const isTracking = event.detail.tracked;
-
-      if (isTracking && !targetFound) {
-        video.currentTime = 0; // Start video from the beginning when target is found
-        targetFound = true;
-      } else if (!isTracking && targetFound) {
-        targetFound = false; // Update the flag to false
-      }
-    });
-    // Smoothing function
-    function smoothTransform(entity) {
-      const position = entity.object3D.position.clone();
-      const rotation = entity.object3D.rotation.clone();
-
-      previousPositions.push(position);
-      previousRotations.push(rotation);
-
-      if (previousPositions.length > smoothingFactor) {
-        previousPositions.shift();
-        previousRotations.shift();
-      }
-
-      const averagePosition = previousPositions.reduce((sum, pos) => sum.add(pos), new THREE.Vector3()).divideScalar(previousPositions.length);
-      const averageRotation = previousRotations.reduce((sum, rot) => sum.add(rot), new THREE.Euler()).divideScalar(previousRotations.length);
-
-      entity.object3D.position.copy(averagePosition);
-      entity.object3D.rotation.copy(averageRotation);
-    }
-    // Apply smoothing to the videoPlane
-    sceneEl.addEventListener('render-target-loaded', () => {
-      sceneEl.addEventListener('tick', () => {
-        if (targetFound) {
-          smoothTransform(videoPlane);
+    <script>
+        // Error Handling
+        function showError(message) {
+            document.getElementById('errorMessage').textContent = message;
+            document.getElementById('errorMessage').style.display = 'block';
         }
-      });
-    });
-    // Video and Target Events
-    video.addEventListener('ended', () => {
-      // Hide the video plane
-      videoPlane.setAttribute('visible', 'false');
-      // Show the popup form
-      popupEl.style.display = 'block';
-    });
 
-    // Form Submission
-    submitButton.addEventListener('click', () => {
-      const text = userInput.value;
-      console.log("User entered:", text);
-      popupEl.style.display = 'none';
-    });
-  </script>
+        // Get the video element
+        const video = document.getElementById('myVideo');
+        const countdownEl = document.getElementById('countdown');
+        const instructionEl = document.getElementById('instruction'); // Instruction Element
+        const sceneEl = document.querySelector('a-scene');
+        const whiteScreenEl = document.getElementById('whiteScreen');
+        const popupEl = document.getElementById('popup');
+        const submitButton = document.getElementById('submitButton');
+        const userInput = document.getElementById('userInput');
+        const videoPlane = document.getElementById('videoPlane');
+
+        // Request camera access and preload video after access is granted
+        navigator.mediaDevices.getUserMedia({ video: true })
+            .then(() => {
+                // Camera access granted, continue with the countdown
+                video.preload = "auto"; // Start loading the full video
+                video.load();
+
+                setTimeout(() => {
+                    countdownEl.style.display = 'none';
+                    whiteScreenEl.style.display = 'none';
+                    sceneEl.style.display = 'block';
+                    instructionEl.style.display = 'block'; // Show the instruction after countdown
+                }, 8000);
+            })
+            .catch((err) => {
+                console.error("Error accessing camera:", err);
+                showError("Camera access is required. Please allow permission to continue.");
+            });
+
+        // Flag to track if the target is found
+        let targetFound = false;
+
+        // Previous positions and rotations for smoothing
+        let previousPositions = [];
+        let previousRotations = [];
+        const smoothingFactor = 7; // Number of frames to average for smoothing
+
+        // Event Listener for when the target is found
+        const targetEl = document.querySelector('a-entity[mindar-image-target]');
+        targetEl.addEventListener('targetFound', () => {
+            console.log('Target Found!');
+            targetFound = true;
+            video.play();
+            instructionEl.style.display = 'none'; // Hide the instruction when target is found
+        });
+
+        // Smoothing function
+        function smoothTransform(entity) {
+            const position = entity.object3D.position.clone();
+            const rotation = entity.object3D.rotation.clone();
+
+            previousPositions.push(position);
+            previousRotations.push(rotation);
+
+            if (previousPositions.length > smoothingFactor) {
+                previousPositions.shift();
+                previousRotations.shift();
+            }
+
+            const averagePosition = previousPositions.reduce((sum, pos) => sum.add(pos), new THREE.Vector3()).divideScalar(previousPositions.length);
+            const averageRotation = previousRotations.reduce((sum, rot) => sum.add(rot), new THREE.Euler()).divideScalar(previousRotations.length);
+
+            entity.object3D.position.copy(averagePosition);
+            entity.object3D.rotation.copy(averageRotation);
+        }
+
+        // Apply smoothing to the videoPlane
+        sceneEl.addEventListener('render-target-loaded', () => {
+            sceneEl.addEventListener('tick', () => {
+                if (targetFound) {
+                    smoothTransform(videoPlane);
+                }
+            });
+        });
+
+        // Video and Target Events
+        video.addEventListener('ended', () => {
+            // Hide the video plane
+            videoPlane.setAttribute('visible', 'false');
+            // Show the popup form
+            popupEl.style.display = 'block';
+        });
+
+        // Form Submission
+        submitButton.addEventListener('click', () => {
+            const text = userInput.value;
+            console.log("User entered:", text);
+            popupEl.style.display = 'none';
+        });
+    </script>
 </body>
 </html>
