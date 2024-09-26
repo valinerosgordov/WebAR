@@ -144,7 +144,9 @@
     </a-entity>
   </a-scene>
 
-  <script>
+  <script type="module">
+    import { redirectWebSlam } from './script/script.js'
+
     // Error Handling
     function showError(message) {
       document.getElementById('errorMessage').textContent = message;
@@ -257,6 +259,7 @@
       }
       console.log("User entered:", text);
       popupEl.style.display = 'none';
+      redirectWebSlam(text)
     });
   </script>
 </body>
