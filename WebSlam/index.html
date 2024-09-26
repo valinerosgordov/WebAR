@@ -58,11 +58,15 @@
 </head>
 <body>
     <div id="content">
+
         <button type="button" id="place-button" style="display:none;">Разместить</button>
         <button type="button" id="share-button">Поделиться</button>
         <a href="https://t.me/addstickers/KontiNewyear" target="_blank" id="download-stickers-link">
             <button type="button">СКАЧАТЬ СТИКЕРЫ</button>
         </a>
+
+        <button type="button" id="redirect-button">Перейти на другую страницу</button>
+        <button type="button" id="screenshot-button">Сделать скриншот</button>
     </div>
     <div id="container"></div>
     <div id="instruction-text">Наведите камеру на горизонтальную плоскость</div>
@@ -106,6 +110,14 @@
 
         $("#share-button").click(function () {
             shareLink();
+        });
+
+        $("#redirect-button").click(function () {
+            window.location.href = "https://kontirus.ru"; 
+        });
+
+        $("#screenshot-button").click(function () {
+            takeScreenshot();
         });
 
         function shareLink() {
@@ -295,6 +307,19 @@
             }
 
             renderer.render(scene, camera);
+        }
+
+        function takeScreenshot() {
+            
+            const screenshot = renderer.domElement.toDataURL('image/png');
+            
+  
+            const link = document.createElement('a');
+            link.href = screenshot;
+            link.download = 'screenshot.png';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
         }
     </script>
 </body>
