@@ -5,6 +5,9 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <link rel="stylesheet" href="main.css">
+    <script src="https://cdn.jsdelivr.net/npm/webxr-polyfill@latest/build/webxr-polyfill.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
     
     <!-- Importing the Vaccine Regular font -->
     <style>
@@ -15,14 +18,14 @@
         }
         @font-face {
             font-family: 'Vaccine Regular';
-            src: url('fonts/Vaccine-Regular.ttf') format('truetype'); /* Update the path as needed */
+            src: url('fonts/Vaccine-Regular.ttf') format('truetype');
             font-weight: normal;
             font-style: normal;
         }
 
         body {
             margin: 0;
-            font-family: 'Vaccine Regular', Arial, sans-serif; /* Set font for the body */
+            font-family: 'Vaccine Regular', Arial, sans-serif;
             overflow: hidden;
             background: none;
         }
@@ -43,7 +46,7 @@
             color: white;
             cursor: pointer;
             transition: background-color 0.3s;
-            font-family: 'Vaccine Regular', Arial, sans-serif; /* Font for buttons */
+            font-family: 'Vaccine Regular', Arial, sans-serif;
         }
         #content button:hover {
             background-color: #0056b3;
@@ -60,7 +63,7 @@
             font-size: 16px;
             display: none;
             text-align: center;
-            font-family: 'Vaccine Regular', Arial, sans-serif; /* Font for instruction text */
+            font-family: 'Vaccine Regular', Arial, sans-serif;
         }
         #container {
             position: fixed;
@@ -68,9 +71,6 @@
             height: 100%;
         }
     </style>
-    <script src="https://cdn.jsdelivr.net/npm/webxr-polyfill@latest/build/webxr-polyfill.min.js"></script>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-    <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
 </head>
 <body>
     <div id="content">
@@ -85,8 +85,6 @@
     <div id="container"></div>
     <div id="instruction-text">Наведите камеру на горизонтальную плоскость</div>
 
-
-
     <model-viewer
         id="ar-viewer"
         src="1.glb"
@@ -96,9 +94,7 @@
         camera-controls
         style="display:none; width: 100%; height: 100%;"></model-viewer>
 
-        <audio id="placement-sound" src="sound.wav" preload="auto"></audio>
-
-
+    <audio id="placement-sound" src="sound.wav" preload="auto"></audio>
 
     <script type="module">
         import * as THREE from './build/three.module.js';
@@ -150,18 +146,16 @@
                 alert('Your browser does not support the Web Share API.');
             }
         }
-        let soundname= undefined;
 
-        async function arPlace() {
+        let soundname = undefined;
+
+        function arPlace() {
             if (reticle.visible) {
                 current_object.position.setFromMatrixPosition(reticle.matrix);
                 current_object.visible = true;
                 document.getElementById('instruction-text').style.display = 'none';
                 console.log("Model placed at: ", current_object.position);
-                // placementSound.play().catch(error => {
-                //     console.error("Audio play failed: ", error);
-                // });
-                await fetchData()
+                fetchData();
             } else {
                 console.log("Reticle is not visible. Cannot place the model.");
             }
@@ -236,93 +230,87 @@
             pmremGenerator = new THREE.PMREMGenerator(renderer);
             loadModel();
 
-            controller = renderer.xr.getController(0);
-            controller.addEventListener('selectstart', onSelectStart);
-            controller.addEventListener('selectend', onSelectEnd);
-            scene.add(controller);
+            const reticleGeometry = new THREE.RingGeometry(0.15, 0.2, 32).rotateX(-Math.PI / 2);
+            const reticleMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff });
+            reticle = new THREE.Mesh(reticleGeometry, reticleMaterial);
+            reticle.matrixAutoUpdate = false;
+            reticle.visible = false;
+            scene.add(reticle);
 
-            document.body.appendChild(ARButton.createButton(renderer));
-            window.addEventListener('resize', onWindowResize);
-        }
+            document.body.appendChild(ARButton.createButton(renderer, { requiredFeatures: ['hit-test'] }));
 
-        function onSelectStart(event) {
-            const controller = event.target;
+            renderer.xr.addEventListener('sessionstart', async () => {
+                const session = renderer.xr.getSession();
+                const viewerSpace = await session.requestReferenceSpace('viewer');
+                hitTestSource = await session.requestHitTestSource({ space: viewerSpace });
 
-            const intersections = getIntersections(controller);
-            if (intersections.length > 0) {
-                arPlace();
-            }
-        }
+                hitTestSourceRequested = true;
 
-        function onSelectEnd(event) {}
+                session.addEventListener('end', () => {
+                    hitTestSourceRequested = false;
+                    hitTestSource = null;
+                });
+            });
 
-        function getIntersections(controller) {
-            const tempMatrix = new THREE.Matrix4();
-            const line = new THREE.Line2(new THREE.Vector2(), new THREE.Vector2());
+            window.addEventListener('resize', onWindowResize, false);
 
-            const raycaster = new THREE.Raycaster();
-            tempMatrix.identity().extractRotation(controller.matrixWorld);
-            raycaster.ray.origin.setFromMatrixPosition(controller.matrixWorld);
-            raycaster.ray.direction.set(0, 0, -1).applyMatrix4(tempMatrix);
-
-            return raycaster.intersectObjects([current_object], false);
+            controls = new OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            controls.target.set(0, 1.6, 0);
+            controls.update();
         }
 
         function onWindowResize() {
             camera.aspect = window.innerWidth / window.innerHeight;
             camera.updateProjectionMatrix();
             renderer.setSize(window.innerWidth, window.innerHeight);
+            render();
+        }
+
+        function updateReticle(frame) {
+            if (hitTestSource && renderer.xr.isPresenting) {
+                const referenceSpace = renderer.xr.getReferenceSpace();
+                const hitTestResults = frame.getHitTestResults(hitTestSource);
+
+                if (hitTestResults.length > 0) {
+                    const hit = hitTestResults[0];
+                    const pose = hit.getPose(referenceSpace);
+
+                    reticle.visible = true;
+                    reticle.matrix.fromArray(pose.transform.matrix);
+                    
+                    // Show the "Разместить" button when reticle is visible
+                    document.getElementById("place-button").style.display = "block";
+                } else {
+                    reticle.visible = false;
+
+                    // Hide the "Разместить" button if no plane is detected
+                    document.getElementById("place-button").style.display = "none";
+                }
+            }
         }
 
         function animate() {
-            renderer.setAnimationLoop(render);
+            renderer.setAnimationLoop(function (frame) {
+                updateReticle(frame);
+                render();
+
+                const delta = clock.getDelta();
+                if (animationMixer) animationMixer.update(delta);
+            });
         }
 
         function render() {
-            const delta = clock.getDelta();
-            if (animationMixer) animationMixer.update(delta); // Update the animation mixer if it exists
             renderer.render(scene, camera);
         }
 
-        async function fetchData() {
-            try {
-                const response = await fetch('https://arplatov-6e62e-default-rtdb.firebaseio.com/baseNames.json')
-                const {Names} = await response.json();
-                
-                console.log(Names); 
-                
-                const url = window.location.href
-                const newurl = url.split("?")
-                const idx = newurl[newurl.length-1]
-                soundname = Names[idx]?.sound
-
-                console.log(soundname)
-
-                playSound()
-                
-            } catch (error) {
-                console.error('Error fetching Names:', error);
-            }
+        function fetchData() {
+            $.get('https://jsonplaceholder.typicode.com/posts', function (data) {
+                console.log('Data fetched:', data);
+            }).fail(function (error) {
+                console.error('Error fetching data:', error);
+            });
         }
-
-        const playSound = () =>{
-            let audioStart = new Audio(`/slam/firstPart.wav`);
-            let audioName = new Audio(`/slam/audio/speech/${soundname}`);
-            let audioFinaly = new Audio(`/slam/secondPart.wav`);
-
-            audioStart.onloadedmetadata = () => {
-                let durationStart = (audioStart.duration*1000) + 500
-                audioStart.play(); 
-                setTimeout(() => {
-                    let durationName = (audioName.duration*1000) + 200
-                    audioName.play(); 
-                    setTimeout(() => {
-                        audioFinaly.play(); 
-                    }, durationName)  
-                }, durationStart)                 
-            }
-        }
-
     </script>
 </body>
 </html>
