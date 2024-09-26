@@ -3,8 +3,7 @@
 <head>
     <!-- Yandex.Metrika counter -->
 <script type="text/javascript" >
-  (function(m,e,t,r,i,k,a){m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
-  m[i].l=1*new Date();
+  (function(m,e,t,r,i,k,a){m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};m[i].l=1*new Date();
   for (var j = 0; j < document.scripts.length; j++) {if (document.scripts[j].src === r) { return; }}
   k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)})
   (window, document, "script", "https://mc.yandex.ru/metrika/tag.js", "ym");
@@ -37,7 +36,7 @@
     }
     #countdown {
       position: absolute;
-      top: 50%;
+      top: 40%;
       left: 50%;
       transform: translate(-50%, -50%);
       font-size: 4em;
@@ -45,6 +44,22 @@
       font-weight: bold;
       z-index: 101;
     }
+    #guideText {
+      position: absolute;
+      bottom: 20px; /* Adjust to position it at the bottom */
+      left: 50%;
+      transform: translateX(-50%); /* Center horizontally */
+      font-size: 2em;
+      color: white;
+      background-color: rgba(0, 0, 0, 0.7);
+      padding: 10px 20px;
+      border-radius: 5px;
+      z-index: 101;
+      font-family: sans-serif;
+      opacity: 0; /* Start as invisible */
+      transition: opacity 0.5s ease-in-out; /* Fade effect */
+}
+
     #whiteScreen {
       position: fixed;
       top: 0;
@@ -77,19 +92,25 @@
       background-color: #007bff;
       color: white;
       border: none;
-      padding: 10px 20px;
+      padding: 10px;
       border-radius: 5px;
       cursor: pointer;
       font-size: 16px;
+      width: 100%;
+      margin-top: 10px; /* Add margin to separate from input field */
+      box-sizing: border-box; /* Make sure the width is consistent */
     }
   </style>
 </head>
 <body>
   <div id="errorMessage" class="error-message" style="display: none;"></div> 
   <div id="countdown">0+</div> 
+
+  <!-- Guide text below the countdown -->
+  <div id="guideText">наведите камеру на логотип</div> 
+
   <div id="whiteScreen"></div> 
   <div id="popup">
-    <h2>С Новым Годом</h2>
     <p>Введите ваше имя!</p>
     <input type="text" id="userInput" placeholder="">
     <a href="https://konti.digitalmarker.ru/slam">
@@ -129,9 +150,10 @@
       document.getElementById('errorMessage').style.display = 'block';
     }
 
-    // Get the video element
+    // Get the video element and other elements
     const video = document.getElementById('myVideo');
     const countdownEl = document.getElementById('countdown');
+    const guideTextEl = document.getElementById('guideText');
     const sceneEl = document.querySelector('a-scene');
     const whiteScreenEl = document.getElementById('whiteScreen');
     const popupEl = document.getElementById('popup');
@@ -148,6 +170,7 @@
 
         setTimeout(() => {
           countdownEl.style.display = 'none';
+          guideTextEl.style.opacity = 1; // Fade in guide text
           whiteScreenEl.style.display = 'none';
           sceneEl.style.display = 'block';
         }, 8000);
@@ -164,6 +187,7 @@
     let previousPositions = [];
     let previousRotations = [];
     const smoothingFactor = 7; // Number of frames to average for smoothing
+
     // Event Listener for when the target is found
     const targetEl = document.querySelector('a-entity[mindar-image-target]');
 
@@ -173,6 +197,7 @@
       // Start playback when the target is found
       video.play();
     });
+
     // Update video time to match target visibility
     sceneEl.addEventListener('mindar-image-track', (event) => {
       const isTracking = event.detail.tracked;
@@ -184,6 +209,7 @@
         targetFound = false; // Update the flag to false
       }
     });
+
     // Smoothing function
     function smoothTransform(entity) {
       const position = entity.object3D.position.clone();
@@ -203,6 +229,7 @@
       entity.object3D.position.copy(averagePosition);
       entity.object3D.rotation.copy(averageRotation);
     }
+
     // Apply smoothing to the videoPlane
     sceneEl.addEventListener('render-target-loaded', () => {
       sceneEl.addEventListener('tick', () => {
@@ -211,6 +238,7 @@
         }
       });
     });
+
     // Video and Target Events
     video.addEventListener('ended', () => {
       // Hide the video plane
@@ -219,9 +247,13 @@
       popupEl.style.display = 'block';
     });
 
-    // Form Submission
+    // Form Submission with Validation
     submitButton.addEventListener('click', () => {
-      const text = userInput.value;
+      const text = userInput.value.trim(); // Trim whitespace
+      if (!text) {
+        showError("Пожалуйста, введите ваше имя!"); // Display error message
+        return; // Stop further execution
+      }
       console.log("User entered:", text);
       popupEl.style.display = 'none';
     });
