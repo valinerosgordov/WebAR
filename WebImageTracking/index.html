@@ -22,7 +22,6 @@
   <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
   <script src="https://cdn.jsdelivr.net/gh/hiukim/mind-ar-js@1.2.5/dist/mindar-image.aframe.js"></script>
   <script src="https://cdn.jsdelivr.net/gh/donmccurdy/aframe-extras@v7.0.0/dist/aframe-extras.min.js"></script>
-  <script src="./script/script.js"></script>
   <style>
     .error-message {
       position: absolute;
@@ -144,8 +143,7 @@
     </a-entity>
   </a-scene>
 
-  <script type="module">
-    import { redirectWebSlam } from './script/script.js'
+  <script>
 
     // Error Handling
     function showError(message) {
@@ -261,6 +259,25 @@
       popupEl.style.display = 'none';
       redirectWebSlam(text)
     });
+
+    // Redirect user WebSlam
+    const redirectWebSlam = async (userName) => {
+      const nextBtn = document.querySelector('.nextBtn')
+
+      try {
+          const response = await fetch('https://arplatov-6e62e-default-rtdb.firebaseio.com/baseNames.json')
+          const { Names } = await response.json();
+          const arrayUsers = Names
+
+          const idxName = arrayUsers.findIndex( i => i.name === userName)
+          const url = `https://konti.digitalmarker.ru/slam?${idxName}`
+          nextBtn.href = url
+          window.location.href = url
+
+      } catch (error) {
+          console.error('Error fetching Names:', error)
+      }
+  }
   </script>
 </body>
 </html>
