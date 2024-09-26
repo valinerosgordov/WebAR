@@ -113,7 +113,7 @@
   <div id="popup">
     <p>Введите ваше имя!</p>
     <input type="text" id="userInput" placeholder="">
-    <a href="https://konti.digitalmarker.ru/slam" class="nextBtn">
+    <a href="#" class="nextBtn">
       <button id="submitButton">Продолжить</button>
     </a>
   </div>
@@ -272,7 +272,7 @@
           const idxName = arrayUsers.findIndex( i => i.name === userName)
           const url = `https://konti.digitalmarker.ru/slam?${idxName}`
           nextBtn.href = url
-          window.location.href = url
+          window.location = url
 
       } catch (error) {
           console.error('Error fetching Names:', error)
