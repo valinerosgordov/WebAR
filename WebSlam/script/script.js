@@ -1,6 +1,6 @@
 let soundname= undefined;
         
-const fetchData = async () => {
+const startPlayAudio = async () => {
     try {
         const response = await fetch('https://arplatov-6e62e-default-rtdb.firebaseio.com/baseNames.json')
         const {Names} = await response.json();

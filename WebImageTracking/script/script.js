@@ -13,10 +13,10 @@ const nextPage = () => {
     nextBtn.href = url
 }
 
-const fetchData = async () => {
+const getUserNames = async () => {
     try {
         const response = await fetch('https://arplatov-6e62e-default-rtdb.firebaseio.com/baseNames.json')
-        const {Names} = await response.json();
+        const { Names } = await response.json();
         arrayUsers = Names            
     } catch (error) {
         console.error('Error fetching Names:', error);
