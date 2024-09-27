@@ -1,151 +1,21 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<!-- Yandex.Metrika counter -->
-<script type="text/javascript" >
-    (function(m,e,t,r,i,k,a){m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
-    m[i].l=1*new Date();
-    for (var j = 0; j < document.scripts.length; j++) {if (document.scripts[j].src === r) { return; }}
-    k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)})
-    (window, document, "script", "https://mc.yandex.ru/metrika/tag.js", "ym");
- 
-    ym(98476437, "init", {
-         clickmap:true,
-         trackLinks:true,
-         accurateTrackBounce:true,
-         webvisor:true
-    });
- </script>
- <noscript><div><img src="https://mc.yandex.ru/watch/98476437" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
- <!-- /Yandex.Metrika counter -->
-    <title>SLamAR</title>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <link type="text/css" rel="stylesheet" href="main.css">
-    <script src="https://cdn.jsdelivr.net/npm/webxr-polyfill@latest/build/webxr-polyfill.min.js"></script>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-    <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
-    <script src="./script/script.js"></script>
-    <style>
-    body {
-    margin: 0;
-    font-family: Arial, sans-serif;
-    overflow: hidden;
-    background: none;
-}
 
-/* Centered container for buttons at the top */
-#content {
-    position: fixed;
-    top: 10px;
-    width: 100%;
-    display: flex;
-    justify-content: center; /* Center buttons horizontally */
-    flex-wrap: wrap; /* Allow buttons to wrap if needed */
-    gap: 10px; /* Space between buttons */
-    z-index: 10;
-}
-
-/* Shared button styling for top buttons */
-#content button {
-    padding: 10px 20px;
-    font-size: 16px;
-    border: none;
-    border-radius: 5px;
-    background-color: #007bff;
-    color: white;
-    cursor: pointer;
-    transition: background-color 0.3s;
-    white-space: nowrap;
-    text-align: center;
-}
-
-#content button:hover {
-    background-color: #0056b3;
-}
-
-/* Centered "Place" button at the bottom */
-#place-button {
-    position: fixed;
-    bottom: 20px; /* Distance from the bottom of the screen */
-    left: 50%;
-    transform: translateX(-50%); /* Center horizontally */
-    z-index: 10; /* Ensure it's above other elements */
-    padding: 12px 24px; /* Adequate padding for better appearance */
-    background-color: #007bff;
-    color: white;
-    border-radius: 5px;
-    font-size: 16px;
-    cursor: pointer;
-    border: none;
-    white-space: nowrap;
-    text-align: center;
-    transition: background-color 0.3s;
-}
-
-#place-button:hover {
-    background-color: #0056b3;
-}
-
-#screenshot-button {
-    position: fixed;
-    top: 10px; /* Positioned at the top right */
-    right: 20px;
-    z-index: 10;
-    padding: 12px 24px;
-    background-color: #007bff;
-    color: white;
-    border-radius: 5px;
-    font-size: 16px;
-    cursor: pointer;
-    border: none;
-    white-space: nowrap;
-    text-align: center;
-    transition: background-color 0.3s;
-}
-
-#screenshot-button:hover {
-    background-color: #0056b3;
-}
-#screenshot-button:hover {
-    background-color: #0056b3;
-}
-
-/* Adjust widths automatically to fit text */
-#place-button, #screenshot-button {
-    width: auto;
-}
-
-    </style>
-</head>
-<body>
-    <div id="content">
-        <button type="button" id="place-button" style="display:none;">Разместить деда мороза</button>
-        <button type="button" id="screenshot-button" style="display:none;">Сделать фото</button> <!-- Moved here -->
-        <button type="button" id="share-button">Поделиться</button>
-        <a href="https://t.me/addstickers/KontiNewyear" target="_blank" id="download-stickers-link">
-            <button type="button">СКАЧАТЬ СТИКЕРЫ</button>
-        </a>
-        <button type="button" id="redirect-button">Магазин Konti</button>
-    </div>
-    <div id="container"></div>
-    <div id="instruction-text">Наведите камеру на горизонтальную плоскость</div>
-
-    <!-- Model Viewer for Cross-Platform AR Support -->
+    <!-- Model Viewer for Cross-Platform AR Support 
     <model-viewer
-        id="ar-viewer"
-        src="1.glb"
-        alt="A 3D model of an object"
-        ar
-        ar-modes="scene-viewer quick-look"
-        camera-controls
-        style="display:none; width: 100%; height: 100%;"></model-viewer>
+    id="ar-viewer"
+    src="1.glb"
+    ios-src="1.usdz"
+    alt="A 3D model"
+    ar
+    ar-modes="quick-look scene-viewer webxr"  
+    camera-controls
+    style="width: 100%; height: 100%;">
+    </model-viewer>
 
-    <!-- Audio Element -->
+    <!-- Audio Element 
     <audio id="placement-sound" src="sound.wav" preload="auto"></audio>
 
     <script type="module">
-        import { startPlayAudio } from './script/script.js';
+        import { startPlayAudio } from './script/script.js'
         import * as THREE from './build/three.module.js';
         import { ARButton } from './jsm/webxr/ARButton.js';
         import { OrbitControls } from './jsm/controls/OrbitControls.js';
@@ -159,28 +29,18 @@
         let animationMixer = null; // Animation mixer
         const clock = new THREE.Clock(); // Clock for managing animation timing
 
-        // Audio element for playing sound
-        const placementSound = document.getElementById('placement-sound');
+        const placementSound = document.getElementById('placement-sound'); // Audio element for playing sound
 
         init();
         animate();
 
-        $("#place-button").click(function () {
-            arPlace();
-        });
+        // Event listeners for buttons
+        $("#place-button").click(arPlace);
+        $("#share-button").click(shareLink);
+        $("#redirect-button").click(() => window.location.href = "https://kontirus.ru"); 
+        $("#screenshot-button").click(takeScreenshot); // Taking screenshot on button click
 
-        $("#share-button").click(function () {
-            shareLink();
-        });
-
-        $("#redirect-button").click(function () {
-            window.location.href = "https://kontirus.ru"; 
-        });
-
-        $("#screenshot-button").click(function () {
-            takePicture();
-        });
-
+        // Sharing the link
         function shareLink() {
             const shareData = {
                 title: 'Перейди по ссылке!',
@@ -197,20 +57,19 @@
             }
         }
 
+        // Place model in AR using hit test
         function arPlace() {
             if (reticle.visible) {
                 current_object.position.setFromMatrixPosition(reticle.matrix);
                 current_object.visible = true;
                 document.getElementById('instruction-text').style.display = 'none'; // Hide the instruction text
-                console.log("Model placed at: ", current_object.position);
-                
-                // Play the audio when the model is placed
-                startPlayAudio(); // Play sound on model placement
+                startPlayAudio(); // Play audio when the model is placed
             } else {
                 console.log("Reticle is not visible. Cannot place the model.");
             }
         }
 
+        // Load the model and environment
         function loadModel() {
             new RGBELoader()
                 .setDataType(THREE.UnsignedByteType)
@@ -247,12 +106,12 @@
                 });
         }
 
+        // Initialize Three.js and WebXR
         function init() {
             container = document.createElement('div');
             document.getElementById("container").appendChild(container);
 
             scene = new THREE.Scene();
-
             camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.001, 200);
             camera.position.set(0, 1.6, 3);
 
@@ -276,120 +135,213 @@
             controls.addEventListener('change', render);
             controls.minDistance = 2;
             controls.maxDistance = 10;
-            controls.target.set(0, 0, -0.2);
-            controls.enableDamping = true;
-            controls.dampingFactor = 0.05;
+            controls.target.set(0, 0, 0);
+            controls.update();
 
-            let options = {
-                requiredFeatures: ['hit-test'],
-                optionalFeatures: ['dom-overlay'],
-                domOverlay: { root: document.getElementById('content') }
-            };
+            loadModel(); // Load the GLTF model
 
-            const arButton = ARButton.createButton(renderer, options);
-            document.body.appendChild(arButton);
-
-            arButton.addEventListener('click', () => {
-                isAR = true;
-                document.getElementById('instruction-text').style.display = 'block'; // Show the instruction text
-                document.getElementById('ar-viewer').style.display = 'none'; // Hide model-viewer
-                
-                // Show the relevant buttons and hide others
-                document.getElementById('place-button').style.display = 'block';
-                document.getElementById('screenshot-button').style.display = 'block'; // Show screenshot button
-                document.getElementById('share-button').style.display = 'none';
-                document.getElementById('redirect-button').style.display = 'none';
-                document.getElementById('download-stickers-link').style.display = 'none';
-            });
+            document.body.appendChild(ARButton.createButton(renderer, {
+                requiredFeatures: ['hit-test']
+            }));
 
             reticle = new THREE.Mesh(
-                new THREE.RingBufferGeometry(0.15, 0.2, 32).rotateX(-Math.PI / 2),
-                new THREE.MeshBasicMaterial({ color: 0x000864 }) // Circle color
+                new THREE.RingGeometry(0.15, 0.2, 32).rotateX(- Math.PI / 2),
+                new THREE.MeshBasicMaterial()
             );
             reticle.matrixAutoUpdate = false;
             reticle.visible = false;
             scene.add(reticle);
 
+            controller = renderer.xr.getController(0);
+            controller.addEventListener('select', onSelect);
+            scene.add(controller);
+
             window.addEventListener('resize', onWindowResize, false);
-
-            loadModel();
         }
 
-        function onWindowResize() {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
+        function onSelect() {
+            if (reticle.visible) {
+                const clone = current_object.clone();
+                clone.position.setFromMatrixPosition(reticle.matrix);
+                scene.add(clone);
+            }
         }
 
+    
+
+        // WebXR session started
+        renderer.xr.addEventListener('sessionstart', () => {
+            isAR = true;
+            document.getElementById('instruction-text').style.display = 'block'; // Show instruction when session starts
+        });
+
+        // WebXR session ended
+        renderer.xr.addEventListener('sessionend', () => {
+            isAR = false;
+            document.getElementById('instruction-text').style.display = 'none'; // Hide instruction when session ends
+        });
+
+        // Animate Three.js scene
         function animate() {
             renderer.setAnimationLoop(render);
-            requestAnimationFrame(animate);
-            controls.update();
+
+            if (animationMixer) {
+                const delta = clock.getDelta();
+                animationMixer.update(delta); // Update the animation mixer each frame
+            }
         }
 
-        function render(timestamp, frame) {
-            // Update the mixer for playing animations
-            if (animationMixer) {
-                const delta = clock.getDelta(); // Get time difference between frames
-                animationMixer.update(delta); // Update the mixer with the time delta
+        // Render function for Three.js
+        function render() {
+            if (renderer.xr.isPresenting && hitTestSourceRequested === false) {
+                const session = renderer.xr.getSession();
+                session.requestReferenceSpace('viewer').then((referenceSpace) => {
+                    session.requestHitTestSource({ space: referenceSpace }).then((source) => {
+                        hitTestSource = source;
+                    });
+                });
+                session.addEventListener('end', () => {
+                    hitTestSourceRequested = false;
+                    hitTestSource = null;
+                });
+                hitTestSourceRequested = true;
             }
 
-            if (frame && isAR) {
+            if (hitTestSource) {
+                const frame = renderer.xr.getFrame();
                 const referenceSpace = renderer.xr.getReferenceSpace();
-                const session = renderer.xr.getSession();
+                const hitTestResults = frame.getHitTestResults(hitTestSource);
 
-                if (!hitTestSourceRequested) {
-                    session.requestReferenceSpace('viewer').then(function (referenceSpace) {
-                        session.requestHitTestSource({ space: referenceSpace }).then(function (source) {
-                            hitTestSource = source;
-                        });
-                    });
+                if (hitTestResults.length > 0) {
+                    const hit = hitTestResults[0];
+                    const hitPose = hit.getPose(referenceSpace);
 
-                    session.addEventListener('end', function () {
-                        hitTestSourceRequested = false;
-                        hitTestSource = null;
-                        isAR = false;
-                        reticle.visible = false;
-                        document.getElementById("place-button").style.display = "none";
-                        document.getElementById("screenshot-button").style.display = "none"; // Hide screenshot button
-                        document.getElementById('instruction-text').style.display = 'none';
-                        document.getElementById('ar-viewer').style.display = 'block'; // Show model-viewer again
-                        
-                        // Show other buttons again
-                        document.getElementById('share-button').style.display = 'block';
-                        document.getElementById('redirect-button').style.display = 'block';
-                        document.getElementById('download-stickers-link').style.display = 'block';
-                    });
-
-                    hitTestSourceRequested = true;
-                }
-
-                if (hitTestSource) {
-                    const hitTestResults = frame.getHitTestResults(hitTestSource);
-                    if (hitTestResults.length) {
-                        const hit = hitTestResults[0];
-                        document.getElementById("place-button").style.display = "block";
-                        reticle.visible = true;
-                        reticle.matrix.fromArray(hit.getPose(referenceSpace).transform.matrix);
-                    } else {
-                        reticle.visible = false;
-                        document.getElementById("place-button").style.display = "none";
-                    }
+                    reticle.visible = true;
+                    reticle.matrix.fromArray(hitPose.transform.matrix);
+                } else {
+                    reticle.visible = false;
                 }
             }
 
             renderer.render(scene, camera);
         }
 
-                function takePicture() {
-            const picture = renderer.domElement.toDataURL('image/png'); // This still captures the canvas
-            const link = document.createElement('a');
-            link.href = picture;
-            link.download = 'picture.png'; // Changed to 'picture.png'
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
+        // Handle window resize event
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            render();
         }
+
+        // Take screenshot functionality
+        function takeScreenshot() {
+            renderer.render(scene, camera);
+            const imgData = renderer.domElement.toDataURL('image/png');
+            const link = document.createElement('a');
+            link.href = imgData;
+            link.download = 'ar_screenshot.png';
+            link.click();
+        }
+    </script>
+</body>
+</html>
+-->
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KontiSlam</title>
+    <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f0f0;
+        }
+        #ar-buttons {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        button {
+            margin: 10px;
+            padding: 10px 20px;
+            font-size: 16px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            background-color: #0469f7;
+            color: white;
+        }
+        button:hover {
+            background-color: #0469f7;
+        }
+        model-viewer {
+            width: 100%;
+            height: 500px;
+            margin: 0 auto;
+            background-color: white;
+        }
+    </style>
+    </head>
+    <body>
+    <!-- Model Viewer with AR -->
+    <model-viewer id="modelViewer" 
+        src="3d/1.glb"  
+        ios-src="3d/1.usdz" 
+        alt="A 3D model"
+        ar ar-modes="scene-viewer quick-look"
+        environment-image="neutral"
+        camera-controls
+        auto-rotate
+        ar-scale="auto">
+    </model-viewer>
+
+    <!-- Buttons to interact with AR -->
+    <div id="ar-buttons">
+        <button id="store-btn">Магазин Konti</button>
+        <button id="download-btn">Скачать Стикеры</button>
+        <button id="share-btn">Поделиться Ссылкой</button>
+    </div>
+
+    <script>
+        const modelViewer = document.getElementById('modelViewer');
+
+        // Button: Магазин Konti (Opens store page)
+        document.getElementById('store-btn').addEventListener('click', () => {
+            window.location.href = 'https://kontirus.ru'; // Replace with your store URL
+        });
+
+       
+
+        // Button: Скачать Стикеры (Download stickers file)
+        document.getElementById('download-btn').addEventListener('click', () => {
+            const link = document.createElement('a');
+            link.href = 'https://t.me/addstickers/KontiNewyear'; // Replace with your file URL
+            //link.download = 'stickers.zip';
+            link.click();
+        });
+
+        // Button: Поделиться Ссылкой (Share current page link)
+        document.getElementById('share-btn').addEventListener('click', async () => {
+            const shareData = {
+                title: 'Check out this AR experience',
+                text: 'View this AR model in 3D and AR!',
+                url: window.location.href
+            };
+            try {
+                await navigator.share(shareData);
+            } catch (err) {
+                alert('Sharing failed: ' + err.message);
+            }
+        });
     </script>
 </body>
 </html>
