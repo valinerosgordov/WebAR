@@ -59,15 +59,13 @@
 </head>
 <body>
     <div id="content">
-
         <button type="button" id="place-button" style="display:none;">Разместить</button>
+        <button type="button" id="screenshot-button" style="display:none;">Сделать фото</button> <!-- Moved here -->
         <button type="button" id="share-button">Поделиться</button>
         <a href="https://t.me/addstickers/KontiNewyear" target="_blank" id="download-stickers-link">
             <button type="button">СКАЧАТЬ СТИКЕРЫ</button>
         </a>
-
-        <button type="button" id="redirect-button">Перейти на другую страницу</button>
-        <button type="button" id="screenshot-button">Сделать фото</button>
+        <button type="button" id="redirect-button">Магазин Konti</button>
     </div>
     <div id="container"></div>
     <div id="instruction-text">Наведите камеру на горизонтальную плоскость</div>
@@ -86,8 +84,7 @@
     <audio id="placement-sound" src="sound.wav" preload="auto"></audio>
 
     <script type="module">
-        import { startPlayAudio } from './script/script.js'
-
+        import { startPlayAudio } from './script/script.js';
         import * as THREE from './build/three.module.js';
         import { ARButton } from './jsm/webxr/ARButton.js';
         import { OrbitControls } from './jsm/controls/OrbitControls.js';
@@ -147,10 +144,7 @@
                 console.log("Model placed at: ", current_object.position);
                 
                 // Play the audio when the model is placed
-                // placementSound.play().catch(error => {
-                //     console.error("Audio play failed: ", error);
-                // });
-                startPlayAudio()
+                startPlayAudio(); // Play sound on model placement
             } else {
                 console.log("Reticle is not visible. Cannot place the model.");
             }
@@ -238,11 +232,18 @@
                 isAR = true;
                 document.getElementById('instruction-text').style.display = 'block'; // Show the instruction text
                 document.getElementById('ar-viewer').style.display = 'none'; // Hide model-viewer
+                
+                // Show the relevant buttons and hide others
+                document.getElementById('place-button').style.display = 'block';
+                document.getElementById('screenshot-button').style.display = 'block'; // Show screenshot button
+                document.getElementById('share-button').style.display = 'none';
+                document.getElementById('redirect-button').style.display = 'none';
+                document.getElementById('download-stickers-link').style.display = 'none';
             });
 
             reticle = new THREE.Mesh(
                 new THREE.RingBufferGeometry(0.15, 0.2, 32).rotateX(-Math.PI / 2),
-                new THREE.MeshBasicMaterial({ color: 0x000864 }) //Circle color
+                new THREE.MeshBasicMaterial({ color: 0x000864 }) // Circle color
             );
             reticle.matrixAutoUpdate = false;
             reticle.visible = false;
@@ -289,8 +290,14 @@
                         isAR = false;
                         reticle.visible = false;
                         document.getElementById("place-button").style.display = "none";
+                        document.getElementById("screenshot-button").style.display = "none"; // Hide screenshot button
                         document.getElementById('instruction-text').style.display = 'none';
                         document.getElementById('ar-viewer').style.display = 'block'; // Show model-viewer again
+                        
+                        // Show other buttons again
+                        document.getElementById('share-button').style.display = 'block';
+                        document.getElementById('redirect-button').style.display = 'block';
+                        document.getElementById('download-stickers-link').style.display = 'block';
                     });
 
                     hitTestSourceRequested = true;
@@ -314,10 +321,7 @@
         }
 
         function takeScreenshot() {
-            
             const screenshot = renderer.domElement.toDataURL('image/png');
-            
-  
             const link = document.createElement('a');
             link.href = screenshot;
             link.download = 'screenshot.png';
