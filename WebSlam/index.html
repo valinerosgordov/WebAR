@@ -27,51 +27,95 @@
     <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
     <script src="./script/script.js"></script>
     <style>
-        body {
-            margin: 0;
-            font-family: Arial, sans-serif;
-            overflow: hidden;
-            background: none;
-        }
-        #content {
-            position: fixed;
-            top: 10px;
-            width: 100%;
-            text-align: center;
-            z-index: 10;
-        }
-        #content button {
-            margin: 5px;
-            padding: 10px 20px;
-            font-size: 16px;
-            border: none;
-            border-radius: 5px;
-            background-color: #007bff;
-            color: white;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
-        #content button:hover {
-            background-color: #0056b3;
-        }
-        #instruction-text {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: rgba(0, 0, 0, 0.5);
-            color: white;
-            padding: 10px;
-            border-radius: 5px;
-            font-size: 16px;
-            display: none;
-            text-align: center;
-        }
-        #container {
-            position: fixed;
-            width: 100%;
-            height: 100%;
-        }
+    body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    overflow: hidden;
+    background: none;
+}
+
+/* Centered container for buttons at the top */
+#content {
+    position: fixed;
+    top: 10px;
+    width: 100%;
+    display: flex;
+    justify-content: center; /* Center buttons horizontally */
+    flex-wrap: wrap; /* Allow buttons to wrap if needed */
+    gap: 10px; /* Space between buttons */
+    z-index: 10;
+}
+
+/* Shared button styling for top buttons */
+#content button {
+    padding: 10px 20px;
+    font-size: 16px;
+    border: none;
+    border-radius: 5px;
+    background-color: #007bff;
+    color: white;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    white-space: nowrap;
+    text-align: center;
+}
+
+#content button:hover {
+    background-color: #0056b3;
+}
+
+/* Centered "Place" button at the bottom */
+#place-button {
+    position: fixed;
+    bottom: 20px; /* Distance from the bottom of the screen */
+    left: 50%;
+    transform: translateX(-50%); /* Center horizontally */
+    z-index: 10; /* Ensure it's above other elements */
+    padding: 12px 24px; /* Adequate padding for better appearance */
+    background-color: #007bff;
+    color: white;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+    border: none;
+    white-space: nowrap;
+    text-align: center;
+    transition: background-color 0.3s;
+}
+
+#place-button:hover {
+    background-color: #0056b3;
+}
+
+#screenshot-button {
+    position: fixed;
+    top: 10px; /* Positioned at the top right */
+    right: 20px;
+    z-index: 10;
+    padding: 12px 24px;
+    background-color: #007bff;
+    color: white;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+    border: none;
+    white-space: nowrap;
+    text-align: center;
+    transition: background-color 0.3s;
+}
+
+#screenshot-button:hover {
+    background-color: #0056b3;
+}
+#screenshot-button:hover {
+    background-color: #0056b3;
+}
+
+/* Adjust widths automatically to fit text */
+#place-button, #screenshot-button {
+    width: auto;
+}
+
     </style>
 </head>
 <body>
@@ -134,7 +178,7 @@
         });
 
         $("#screenshot-button").click(function () {
-            takeScreenshot();
+            takePicture();
         });
 
         function shareLink() {
@@ -337,11 +381,11 @@
             renderer.render(scene, camera);
         }
 
-        function takeScreenshot() {
-            const screenshot = renderer.domElement.toDataURL('image/png');
+                function takePicture() {
+            const picture = renderer.domElement.toDataURL('image/png'); // This still captures the canvas
             const link = document.createElement('a');
-            link.href = screenshot;
-            link.download = 'screenshot.png';
+            link.href = picture;
+            link.download = 'picture.png'; // Changed to 'picture.png'
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
