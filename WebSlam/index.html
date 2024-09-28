@@ -1,5 +1,5 @@
 
-    <!-- Model Viewer for Cross-Platform AR Support 
+    <!--
     <model-viewer
     id="ar-viewer"
     src="1.glb"
@@ -345,11 +345,11 @@
                 alert('Sharing failed: ' + err.message);
             }
         });    
-        // Listen for when the model is placed in AR
-        modelViewer.addEventListener('ar-status', (event) => {
-            if (event.detail.status === 'session-started') {
-                // The AR session has started, we can play the audio
-                audio.play();
+        modelViewer.addEventListener('model-visibility', (event) => {
+            if (event.detail.visible) {
+                audio.play().catch(error => {
+                    console.error("Audio playback failed:", error);
+                });
             }
         });
     </script>
