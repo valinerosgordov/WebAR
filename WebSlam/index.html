@@ -302,6 +302,9 @@
         camera-controls
         auto-rotate
         ar-scale="auto">
+        <button slot="ar-button">
+            Рвзместить Деда мороза
+        </button>
     </model-viewer>
 
     <audio id="placement-audio" src="sound.wav" preload="auto"></audio>
@@ -345,13 +348,13 @@
                 alert('Sharing failed: ' + err.message);
             }
         });    
-        modelViewer.addEventListener('model-visibility', (event) => {
-            if (event.detail.visible) {
-                audio.play().catch(error => {
-                    console.error("Audio playback failed:", error);
-                });
-            }
-        });
+
+        modelViewer.addEventListener('ar-status', (event) => {
+                console.log(event)
+                // if (event.detail.status === 'session-started') {
+                //     audio.play();
+                // }
+            });
     </script>
 </body>
 </html>
