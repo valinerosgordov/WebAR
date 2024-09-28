@@ -258,6 +258,8 @@
     <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
     <style>
         body {
+            width: 100vw;
+            height: 100vh;
             font-family: Arial, sans-serif;
             text-align: center;
             margin: 0;
@@ -285,36 +287,80 @@
         }
         model-viewer {
             width: 100%;
-            height: 500px;
+            height: auto;
             margin: 0 auto;
             background-color: white;
+        }
+        /* .btn-active-audio{
+            position: fixed;
+            width: calc(100% - 40px);
+            bottom: 0;
+            left: calc(50% - 10px);
+            z-index: 5;
+            transform: translateX(-50%);
+        } */
+        .wrapper{
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .wrapper-model{
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-shrink: 1;
+        }
+        .wrapper-button{
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 0 0 60px 0;
+        }
+        .hidden{
+            display: none;
         }
     </style>
     </head>
     <body>
     <!-- Model Viewer with AR -->
-    <model-viewer id="modelViewer" 
-        src="3d/1.glb"  
-        ios-src="3d/1.usdz" 
-        alt="A 3D model"
-        ar ar-modes="scene-viewer quick-look"
-        environment-image="neutral"
-        camera-controls
-        auto-rotate
-        ar-scale="auto">
-        <button slot="ar-button">
-            Рвзместить Деда мороза
-        </button>
-    </model-viewer>
-
-    <audio id="placement-audio" src="sound.wav" preload="auto"></audio>
+     <div class="wrapper">
+        <div class="wrapper-model">
+            <model-viewer id="modelViewer" 
+                src="3d/1.glb"  
+                ios-src="3d/1.usdz" 
+                alt="A 3D model"
+                ar ar-modes="scene-viewer quick-look"
+                environment-image="neutral"
+                camera-controls
+                auto-rotate
+                ar-scale="auto"
+                touch-action="pan-y"
+                disable-pan
+                max-camera-orbit="auto 90deg auto"
+                >
+                <button slot="ar-button" class="hidden">
+                    
+                </button>
+            </model-viewer>
+        </div>
+        <div class="wrapper-button">
+            <div id="ar-buttons">
+                <button id="store-btn">Магазин Konti</button>
+                <button id="download-btn">Скачать Стикеры</button>
+                <button id="share-btn">Поделиться Ссылкой</button>
+                <button class="btn-active-audio">
+                    Разместить Деда мороза
+                </button>
+            </div>
+        </div>
+     </div>
     
     <!-- Buttons to interact with AR -->
-    <div id="ar-buttons">
-        <button id="store-btn">Магазин Konti</button>
-        <button id="download-btn">Скачать Стикеры</button>
-        <button id="share-btn">Поделиться Ссылкой</button>
-    </div>
+
 
     <script>
         const modelViewer = document.getElementById('modelViewer');
@@ -349,7 +395,63 @@
             }
         });    
 
-        modelViewer.addEventListener('ar-status', (event) => {
+        const btn = document.querySelector('.btn-active-audio')
+        btn.onclick = async () => {
+            btn.style.pointerEvents = "none";
+            await startPlayAudio() 
+            function start() {
+                console.log("start")
+            }
+            this.renderer.xr.addEventListener('sessionstart', start)
+            modelViewer.activateAR()
+        }
+
+        modelViewer.addEventListener("select", (event) => {
+            console.log(event)
+        });
+
+
+        const startPlayAudio = async () => {
+            try {
+                const response = await fetch('https://arplatov-6e62e-default-rtdb.firebaseio.com/baseNames.json')
+                const {Names} = await response.json();
+                
+                console.log(Names); 
+                
+                const url = window.location.href
+                const newurl = url.split("?")
+                const idx = newurl[newurl.length-1]
+                const soundname = Names[idx]?.sound
+
+                console.log(soundname)
+
+                const playSound = (soundname) =>{
+                    let audioStart = new Audio(`/slam/firstPart.wav`);
+                    let audioName = new Audio(`/slam/audio/speech/${soundname}`);
+                    let audioFinaly = new Audio(`/slam/secondPart.wav`);
+                
+                    audioStart.onloadedmetadata = () => {
+                        let durationStart = (audioStart.duration*1000) + 1000
+                        audioStart.play(); 
+                        setTimeout(() => {
+                            let durationName = (audioName.duration*1000) + 200
+                            audioName.play(); 
+                            setTimeout(() => {
+                                audioFinaly.play(); 
+                                btn.style.pointerEvents = "auto";
+                            }, durationName)  
+                        }, durationStart)                 
+                    }
+                }
+
+                playSound(soundname)
+                
+            } catch (error) {
+                console.error('Error fetching Names:', error);
+            }
+        }
+
+        modelViewer.addEventListener('ar-tracking', (event) => {
                 console.log(event)
                 // if (event.detail.status === 'session-started') {
                 //     audio.play();
