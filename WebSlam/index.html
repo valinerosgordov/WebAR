@@ -1,254 +1,3 @@
-
-    <!--
-    <model-viewer
-    id="ar-viewer"
-    src="1.glb"
-    ios-src="1.usdz"
-    alt="A 3D model"
-    ar
-    ar-modes="quick-look scene-viewer webxr"  
-    camera-controls
-    style="width: 100%; height: 100%;">
-    </model-viewer>
-
-    Audio Element 
-    <audio id="placement-sound" src="sound.wav" preload="auto"></audio>
-
-    <script type="module">
-        import { startPlayAudio } from './script/script.js'
-        import * as THREE from './build/three.module.js';
-        import { ARButton } from './jsm/webxr/ARButton.js';
-        import { OrbitControls } from './jsm/controls/OrbitControls.js';
-        import { GLTFLoader } from './jsm/loaders/GLTFLoader.js';
-        import { RGBELoader } from './jsm/loaders/RGBELoader.js';
-
-        let container, camera, scene, renderer, controller;
-        let reticle, pmremGenerator, current_object, controls, isAR = false, envmap;
-        let hitTestSource = null;
-        let hitTestSourceRequested = false;
-        let animationMixer = null; // Animation mixer
-        const clock = new THREE.Clock(); // Clock for managing animation timing
-
-        const placementSound = document.getElementById('placement-sound'); // Audio element for playing sound
-
-        init();
-        animate();
-
-        // Event listeners for buttons
-        $("#place-button").click(arPlace);
-        $("#share-button").click(shareLink);
-        $("#redirect-button").click(() => window.location.href = "https://kontirus.ru"); 
-        $("#screenshot-button").click(takeScreenshot); // Taking screenshot on button click
-
-        // Sharing the link
-        function shareLink() {
-            const shareData = {
-                title: 'Перейди по ссылке!',
-                text: 'C новым годом',
-                url: 'https://konti.digitalmarker.ru/slamshared'
-            };
-
-            if (navigator.share) {
-                navigator.share(shareData)
-                    .then(() => console.log('Link shared successfully'))
-                    .catch((error) => console.error('Error sharing link:', error));
-            } else {
-                alert('Your browser does not support the Web Share API.');
-            }
-        }
-
-        // Place model in AR using hit test
-        function arPlace() {
-            if (reticle.visible) {
-                current_object.position.setFromMatrixPosition(reticle.matrix);
-                current_object.visible = true;
-                document.getElementById('instruction-text').style.display = 'none'; // Hide the instruction text
-                startPlayAudio(); // Play audio when the model is placed
-            } else {
-                console.log("Reticle is not visible. Cannot place the model.");
-            }
-        }
-
-        // Load the model and environment
-        function loadModel() {
-            new RGBELoader()
-                .setDataType(THREE.UnsignedByteType)
-                .setPath('textures/')
-                .load('photo_studio_01_1k.hdr', function (texture) {
-                    envmap = pmremGenerator.fromEquirectangular(texture).texture;
-                    scene.environment = envmap;
-                    texture.dispose();
-                    pmremGenerator.dispose();
-                    render();
-
-                    const loader = new GLTFLoader().setPath('3d/');
-                    loader.load("1.glb", function (glb) {
-                        current_object = glb.scene;
-                        current_object.visible = false; // Initially hidden
-                        scene.add(current_object);
-
-                        // Create Animation Mixer and Play the Animation
-                        if (glb.animations && glb.animations.length > 0) {
-                            animationMixer = new THREE.AnimationMixer(current_object);
-                            const action = animationMixer.clipAction(glb.animations[0]); // Play the first animation
-                            action.play();
-                        }
-
-                        const box = new THREE.Box3();
-                        box.setFromObject(current_object);
-                        box.getCenter(controls.target); // Use getCenter instead of center
-
-                        controls.update();
-                        render();
-                    }, undefined, function (error) {
-                        console.error('An error happened during model loading:', error);
-                    });
-                });
-        }
-
-        // Initialize Three.js and WebXR
-        function init() {
-            container = document.createElement('div');
-            document.getElementById("container").appendChild(container);
-
-            scene = new THREE.Scene();
-            camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.001, 200);
-            camera.position.set(0, 1.6, 3);
-
-            const directionalLight = new THREE.DirectionalLight(0xdddddd, 1);
-            directionalLight.position.set(0, 0, 1).normalize();
-            scene.add(directionalLight);
-
-            const ambientLight = new THREE.AmbientLight(0x222222);
-            scene.add(ambientLight);
-
-            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-            renderer.setPixelRatio(window.devicePixelRatio);
-            renderer.setSize(window.innerWidth, window.innerHeight);
-            renderer.xr.enabled = true;
-            container.appendChild(renderer.domElement);
-
-            pmremGenerator = new THREE.PMREMGenerator(renderer);
-            pmremGenerator.compileEquirectangularShader();
-
-            controls = new OrbitControls(camera, renderer.domElement);
-            controls.addEventListener('change', render);
-            controls.minDistance = 2;
-            controls.maxDistance = 10;
-            controls.target.set(0, 0, 0);
-            controls.update();
-
-            loadModel(); // Load the GLTF model
-
-            document.body.appendChild(ARButton.createButton(renderer, {
-                requiredFeatures: ['hit-test']
-            }));
-
-            reticle = new THREE.Mesh(
-                new THREE.RingGeometry(0.15, 0.2, 32).rotateX(- Math.PI / 2),
-                new THREE.MeshBasicMaterial()
-            );
-            reticle.matrixAutoUpdate = false;
-            reticle.visible = false;
-            scene.add(reticle);
-
-            controller = renderer.xr.getController(0);
-            controller.addEventListener('select', onSelect);
-            scene.add(controller);
-
-            window.addEventListener('resize', onWindowResize, false);
-        }
-
-        function onSelect() {
-            if (reticle.visible) {
-                const clone = current_object.clone();
-                clone.position.setFromMatrixPosition(reticle.matrix);
-                scene.add(clone);
-            }
-        }
-
-    
-
-        // WebXR session started
-        renderer.xr.addEventListener('sessionstart', () => {
-            isAR = true;
-            document.getElementById('instruction-text').style.display = 'block'; // Show instruction when session starts
-        });
-
-        // WebXR session ended
-        renderer.xr.addEventListener('sessionend', () => {
-            isAR = false;
-            document.getElementById('instruction-text').style.display = 'none'; // Hide instruction when session ends
-        });
-
-        // Animate Three.js scene
-        function animate() {
-            renderer.setAnimationLoop(render);
-
-            if (animationMixer) {
-                const delta = clock.getDelta();
-                animationMixer.update(delta); // Update the animation mixer each frame
-            }
-        }
-
-        // Render function for Three.js
-        function render() {
-            if (renderer.xr.isPresenting && hitTestSourceRequested === false) {
-                const session = renderer.xr.getSession();
-                session.requestReferenceSpace('viewer').then((referenceSpace) => {
-                    session.requestHitTestSource({ space: referenceSpace }).then((source) => {
-                        hitTestSource = source;
-                    });
-                });
-                session.addEventListener('end', () => {
-                    hitTestSourceRequested = false;
-                    hitTestSource = null;
-                });
-                hitTestSourceRequested = true;
-            }
-
-            if (hitTestSource) {
-                const frame = renderer.xr.getFrame();
-                const referenceSpace = renderer.xr.getReferenceSpace();
-                const hitTestResults = frame.getHitTestResults(hitTestSource);
-
-                if (hitTestResults.length > 0) {
-                    const hit = hitTestResults[0];
-                    const hitPose = hit.getPose(referenceSpace);
-
-                    reticle.visible = true;
-                    reticle.matrix.fromArray(hitPose.transform.matrix);
-                } else {
-                    reticle.visible = false;
-                }
-            }
-
-            renderer.render(scene, camera);
-        }
-
-        // Handle window resize event
-        function onWindowResize() {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
-            render();
-        }
-
-        // Take screenshot functionality
-        function takeScreenshot() {
-            renderer.render(scene, camera);
-            const imgData = renderer.domElement.toDataURL('image/png');
-            const link = document.createElement('a');
-            link.href = imgData;
-            link.download = 'ar_screenshot.png';
-            link.click();
-        }
-    </script>
-</body>
-</html>
--->
-
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -287,7 +36,7 @@
         }
         model-viewer {
             width: 100%;
-            height: auto;
+            height: 100%;
             margin: 0 auto;
             background-color: white;
         }
@@ -308,9 +57,12 @@
             align-items: center;
         }
         .wrapper-model{
+            position: relative;
             width: 100%;
             height: 100%;
             display: flex;
+            justify-content: center;
+            align-items: center;
             flex-shrink: 1;
         }
         .wrapper-button{
@@ -319,6 +71,13 @@
             justify-content: center;
             align-items: center;
             padding: 0 0 60px 0;
+        }
+        .loading{
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
         }
         .hidden{
             display: none;
@@ -329,6 +88,7 @@
     <!-- Model Viewer with AR -->
      <div class="wrapper">
         <div class="wrapper-model">
+            <div class="loading">loading...</div>
             <model-viewer id="modelViewer" 
                 src="3d/1.glb"  
                 ios-src="3d/1.usdz" 
@@ -395,18 +155,26 @@
             }
         });    
 
+
+        modelViewer.addEventListener("model-visibility", event => {
+            if (event.detail.visible) {
+                document.querySelector('.loading').style.display = 'none'
+            }
+        });
+
+
         const btn = document.querySelector('.btn-active-audio')
         btn.onclick = async () => {
-            btn.style.pointerEvents = "none";
-            await startPlayAudio() 
-            function start() {
-                console.log("start")
+            try {
+                btn.style.pointerEvents = "none";
+                await startPlayAudio() 
+                modelViewer.activateAR()
+            } catch (error) {
+                console.error(error)
             }
-            this.renderer.xr.addEventListener('sessionstart', start)
-            modelViewer.activateAR()
         }
 
-        modelViewer.addEventListener("select", (event) => {
+        modelViewer.addEventListener("ar-status", event => {
             console.log(event)
         });
 
@@ -416,14 +184,10 @@
                 const response = await fetch('https://arplatov-6e62e-default-rtdb.firebaseio.com/baseNames.json')
                 const {Names} = await response.json();
                 
-                console.log(Names); 
-                
                 const url = window.location.href
                 const newurl = url.split("?")
                 const idx = newurl[newurl.length-1]
                 const soundname = Names[idx]?.sound
-
-                console.log(soundname)
 
                 const playSound = (soundname) =>{
                     let audioStart = new Audio(`/slam/firstPart.wav`);
@@ -451,12 +215,7 @@
             }
         }
 
-        modelViewer.addEventListener('ar-tracking', (event) => {
-                console.log(event)
-                // if (event.detail.status === 'session-started') {
-                //     audio.play();
-                // }
-            });
+
     </script>
 </body>
 </html>
