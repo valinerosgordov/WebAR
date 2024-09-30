@@ -1,0 +1,7 @@
+{
+  "users": [
+    { "name": "веселья", "audio": "WebSlam/sound/name/веселья.wav" },
+    { "name": "друг мой", "audio": "WebSlam/sound/name/друг мой.wav" },
+    { "name": "здоровья", "audio": "WebSlam/sound/name/здоровья.wav" }
+  ]
+}
