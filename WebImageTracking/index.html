@@ -134,9 +134,16 @@
     style="display: none;">
     
     <a-assets>
-      <video id="myVideo" preload="metadata" webkit-playsinline playsinline crossorigin="anonymous" type="video/mp4" >
+      <!-- <video id="myVideo" preload="metadata" webkit-playsinline playsinline crossorigin="anonymous" type="video/mp4" >
         <source src="konti.mp4" type="video/mp4">
-      </video> 
+      </video>  -->
+      <video id="myVideo" preload="metadata" loop muted autoplay playsinline webkit-playsinline crossorigin="anonymous" type="video/mp4">
+        <source src="konti.mp4" type="video/mp4">
+        Ваш браузер не поддерживает видео.
+    </video>
+    <audio id="myAudio" preload="auto">
+      <source src="voice.mp3" type="audio/mpeg">
+  </audio>
       <!-- <video id="myVideo" preload="metadata"  webkit-playsinline playsinline crossorigin="anonymous">
         <source src="konti.mp4" type="video/mp4">
       </video> -->
@@ -174,6 +181,42 @@
     const userInput = document.getElementById('userInput');
     const videoPlane = document.getElementById('videoPlane');
 
+
+  // Проверка, поддерживает ли iOS автовоспроизведение
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+
+  // Функция для проверки готовности видео
+  const checkVideoReady = () => {
+    if (video.readyState >= 2) {
+      video.play().catch(error => {
+        console.error('Ошибка воспроизведения видео:', error);
+      });
+    } else {
+      video.addEventListener('loadeddata', checkVideoReady);
+    }
+  };
+
+  // Запускаем проверку готовности видео при загрузке страницы
+  window.addEventListener('load', () => {
+    if (isIOS) {
+      // Для iOS перезапускаем видео после взаимодействия
+      document.body.addEventListener('click', () => {
+        checkVideoReady();
+      }, { once: true });
+    } else {
+      checkVideoReady();
+    }
+  });
+
+
+
+
+
+
+
+
+
+
     // Request camera access and preload video after access is granted
     navigator.mediaDevices.getUserMedia({ video: true })
       .then(() => {
@@ -204,18 +247,55 @@
     // Event Listener for when the target is found
     const targetEl = document.querySelector('a-entity[mindar-image-target]');
 
-    targetEl.addEventListener('targetFound', () => {
-      console.log('Target Found!');
-      targetFound = true;
-      // Start playback when the target is found
-      video.play();
-    //   let audioStart = new Audio(`voice.mp3`);
-    //   audioStart.onloadedmetadata = () => {
-    //     audioStart.play(); 
-    //   }
-      guideTextEl.style.opacity = 0;  // Or use guideTextEl.style.display = 'none';
+    // targetEl.addEventListener('targetFound', () => {
+    //   console.log('Target Found!');
+    //   targetFound = true;
+    //   // Start playback when the target is found
+    //   video.play();
+    // //   let audioStart = new Audio(`voice.mp3`);
+    // //   audioStart.onloadedmetadata = () => {
+    // //     audioStart.play(); 
+    // //   }
+    //   guideTextEl.style.opacity = 0;  // Or use guideTextEl.style.display = 'none';
 
-    });
+    // });
+
+
+    targetEl.addEventListener('targetFound', async () => {
+    if (!targetFound) {
+        console.log('Target Found!');
+        targetFound = true;
+
+        // Извлекаем элемент аудио из разметки
+        const audio = document.getElementById('myAudio');
+
+        // Функция для воспроизведения
+        const playMedia = async () => {
+            try {
+                // Запускаем аудио
+                const audioPromise = audio.play();
+
+                // Запускаем видео
+                const videoPromise = video.play();
+
+                // Ждем, пока оба медиа не начнут воспроизводиться
+                await Promise.all([audioPromise, videoPromise]);
+
+                // Скрываем текст
+                guideTextEl.style.opacity = 0;
+            } catch (error) {
+                console.error('Ошибка при воспроизведении медиа:', error);
+                // Проверка ошибок
+                if (error.name === 'NotAllowedError') {
+                    showError("Пожалуйста, разрешите воспроизведение аудио.");
+                }
+            }
+        };
+
+        // Запускаем воспроизведение после пользовательского взаимодействия
+        document.body.addEventListener('click', playMedia, { once: true });
+    }
+});
 
     // Update video time to match target visibility
     sceneEl.addEventListener('mindar-image-track', (event) => {
