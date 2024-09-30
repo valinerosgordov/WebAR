@@ -239,27 +239,13 @@
     // Flag to track if the target is found
     let targetFound = false;
 
-    // Previous positions and rotations for smoothing
-    let previousPositions = [];
-    let previousRotations = [];
-    const smoothingFactor = 7; // Number of frames to average for smoothing
+    // // Previous positions and rotations for smoothing
+    // let previousPositions = [];
+    // let previousRotations = [];
+    // const smoothingFactor = 7; // Number of frames to average for smoothing
 
-    // Event Listener for when the target is found
+
     const targetEl = document.querySelector('a-entity[mindar-image-target]');
-
-    // targetEl.addEventListener('targetFound', () => {
-    //   console.log('Target Found!');
-    //   targetFound = true;
-    //   // Start playback when the target is found
-    //   video.play();
-    // //   let audioStart = new Audio(`voice.mp3`);
-    // //   audioStart.onloadedmetadata = () => {
-    // //     audioStart.play(); 
-    // //   }
-    //   guideTextEl.style.opacity = 0;  // Or use guideTextEl.style.display = 'none';
-
-    // });
-
 
     targetEl.addEventListener('targetFound', async () => {
       if (!targetFound) {
@@ -322,33 +308,34 @@
       }
     });
 
-    // Smoothing function
+
+
+
+
+    const fixedSize = new THREE.Vector3(1.5, 1.34, 0); // Задайте фиксированный размер для объекта
+    const fixedPosition = new THREE.Vector3(0, 0, 0); // Фиксированная позиция
+
     function smoothTransform(entity) {
-      const position = entity.object3D.position.clone();
-      const rotation = entity.object3D.rotation.clone();
+        // Установите фиксированный размер
+        entity.object3D.scale.copy(fixedSize);
 
-      previousPositions.push(position);
-      previousRotations.push(rotation);
+        // Плавное движение к фиксированной позиции
+        const currentPosition = entity.object3D.position.clone();
+        entity.object3D.position.lerp(fixedPosition, 0.1); // Измените значение 0.1 для настройки плавности
 
-      if (previousPositions.length > smoothingFactor) {
-        previousPositions.shift();
-        previousRotations.shift();
-      }
-
-      const averagePosition = previousPositions.reduce((sum, pos) => sum.add(pos), new THREE.Vector3()).divideScalar(previousPositions.length);
-      const averageRotation = previousRotations.reduce((sum, rot) => sum.add(rot), new THREE.Euler()).divideScalar(previousRotations.length);
-
-      entity.object3D.position.copy(averagePosition);
-      entity.object3D.rotation.copy(averageRotation);
+        // Плавное вращение с использованием кватернионов
+        const currentQuaternion = entity.object3D.quaternion.clone();
+        const targetQuaternion = new THREE.Quaternion(); // Задайте целевое вращение по вашему усмотрению
+        entity.object3D.quaternion.slerp(targetQuaternion, 0.1); // Измените значение 0.1 для настройки плавности
     }
 
-    // Apply smoothing to the videoPlane
+    // Применяем сглаживание к videoPlane
     sceneEl.addEventListener('render-target-loaded', () => {
-      sceneEl.addEventListener('tick', () => {
-        if (targetFound) {
-          smoothTransform(videoPlane);
-        }
-      });
+        sceneEl.addEventListener('tick', () => {
+            if (targetFound) {
+                smoothTransform(videoPlane);
+            }
+        });
     });
 
     // Video and Target Events
