@@ -102,7 +102,14 @@
       font-size: 16px;
       width: 100%; /* Set width to 100%, same as input */
       box-sizing: border-box; /* Ensure padding doesn't affect width */
-}
+    }
+    h2{
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-bottom: 8px;
+    }
   </style>
 </head>
 <body>
@@ -114,8 +121,8 @@
 
   <div id="whiteScreen"></div> 
   <div id="popup">
-    <p>Введите ваше имя!</p>
-    <input type="text" id="userInput" placeholder="">
+    <h2>Введите ваше имя</h2>
+    <input type="text" id="userInput" placeholder="Ваше имя">
     <a href="#" class="nextBtn">
       <button id="submitButton">Продолжить</button>
     </a>
