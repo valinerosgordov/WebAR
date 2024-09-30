@@ -134,12 +134,12 @@
     style="display: none;">
     
     <a-assets>
-      <!-- <video id="myVideo" preload="metadata" webkit-playsinline playsinline crossorigin="anonymous" type="video/mp4" >
+      <video id="myVideo" preload="metadata" webkit-playsinline playsinline crossorigin="anonymous" type="video/mp4" >
         <source src="konti.mp4" type="video/mp4">
-      </video>  -->
-      <video id="myVideo" preload="metadata" webkit-playsinline playsinline crossorigin="anonymous">
+      </video> 
+      <!-- <video id="myVideo" preload="metadata"  webkit-playsinline playsinline crossorigin="anonymous">
         <source src="konti.mp4" type="video/mp4">
-      </video>
+      </video> -->
     </a-assets>
 
     <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
@@ -209,6 +209,10 @@
       targetFound = true;
       // Start playback when the target is found
       video.play();
+    //   let audioStart = new Audio(`voice.mp3`);
+    //   audioStart.onloadedmetadata = () => {
+    //     audioStart.play(); 
+    //   }
       guideTextEl.style.opacity = 0;  // Or use guideTextEl.style.display = 'none';
 
     });
