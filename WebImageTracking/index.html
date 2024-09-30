@@ -262,40 +262,53 @@
 
 
     targetEl.addEventListener('targetFound', async () => {
-    if (!targetFound) {
-        console.log('Target Found!');
-        targetFound = true;
+      if (!targetFound) {
+          console.log('Target Found!');
+          targetFound = true;
 
-        // Извлекаем элемент аудио из разметки
-        const audio = document.getElementById('myAudio');
+          const audio = document.getElementById('myAudio'); // Извлекаем элемент аудио из разметки
 
-        // Функция для воспроизведения
-        const playMedia = async () => {
-            try {
-                // Запускаем аудио
-                const audioPromise = audio.play();
+          const playMedia = async () => {
+              try {
+                  // Запускаем аудио и видео
+                  const audioPromise = audio.play();
+                  const videoPromise = video.play();
 
-                // Запускаем видео
-                const videoPromise = video.play();
+                  // Ждем, пока оба медиа не начнут воспроизводиться
+                  await Promise.all([audioPromise, videoPromise]);
 
-                // Ждем, пока оба медиа не начнут воспроизводиться
-                await Promise.all([audioPromise, videoPromise]);
+                  // Скрываем текст
+                  guideTextEl.style.opacity = 0;
+              } catch (error) {
+                  console.error('Ошибка при воспроизведении медиа:', error);
+                  if (error.name === 'NotAllowedError') {
+                      showError("Пожалуйста, разрешите воспроизведение аудио.");
+                  }
+              }
+          };
 
-                // Скрываем текст
-                guideTextEl.style.opacity = 0;
-            } catch (error) {
-                console.error('Ошибка при воспроизведении медиа:', error);
-                // Проверка ошибок
-                if (error.name === 'NotAllowedError') {
-                    showError("Пожалуйста, разрешите воспроизведение аудио.");
-                }
-            }
-        };
+          // Запускаем воспроизведение после пользовательского взаимодействия
+          document.body.addEventListener('click', playMedia, { once: true });
 
-        // Запускаем воспроизведение после пользовательского взаимодействия
-        document.body.addEventListener('click', playMedia, { once: true });
-    }
-});
+          // Обработчики окончания воспроизведения
+          video.addEventListener('ended', handleMediaEnd);
+          audio.addEventListener('ended', handleMediaEnd);
+      }
+  });
+
+  // Функция для обработки окончания воспроизведения
+  const handleMediaEnd = () => {
+      // Удаляем элемент targetEl из DOM
+      targetEl.parentNode.removeChild(targetEl);
+      
+      // Вызываем console.log
+      console.log("Аудио и видео воспроизведены полностью.");
+      popupEl.style.display = 'block';
+      
+      // Убираем обработчики окончания воспроизведения
+      video.removeEventListener('ended', handleMediaEnd);
+      audio.removeEventListener('ended', handleMediaEnd);
+  };
 
     // Update video time to match target visibility
     sceneEl.addEventListener('mindar-image-track', (event) => {
