@@ -22,10 +22,10 @@
                 touch-action="pan-y"
                 disable-pan
                 max-camera-orbit="auto 90deg auto"
-                autoplay 
+                 
                 >
-                <button slot="ar-button" class="hidden">
-                    
+                <button slot="ar-button">
+                    Разместить Деда мороза
                 </button>
             </model-viewer>
         </div>
@@ -35,7 +35,7 @@
                 <button id="download-btn">Скачать Стикеры</button>
                 <button id="share-btn">Поделиться Ссылкой</button>
                 <button class="btn-active-audio">
-                    Разместить Деда мороза
+                    Поздравить
                 </button>
             </div>
         </div>
@@ -92,7 +92,8 @@
             try {
                 btn.style.pointerEvents = "none";
                 await startPlayAudio() 
-                modelViewer.activateAR()
+                // modelViewer.play()
+                //modelViewer.activateAR()
             } catch (error) {
                 console.error(error)
             }
@@ -117,12 +118,17 @@
                     audioStart.onloadedmetadata = () => {
                         let durationStart = (audioStart.duration*1000) + 1000
                         audioStart.play(); 
+                        modelViewer.play()
                         setTimeout(() => {
                             let durationName = (audioName.duration*1000) + 200
                             audioName.play(); 
                             setTimeout(() => {
+                                let durationFinaly = (audioFinaly.duration*1000) + 200
                                 audioFinaly.play(); 
-                                btn.style.pointerEvents = "auto";
+                                setTimeout(() => {
+                                    btn.style.pointerEvents = "auto";
+                                    modelViewer.pause()
+                                }, durationFinaly) 
                             }, durationName)  
                         }, durationStart)                 
                     }
