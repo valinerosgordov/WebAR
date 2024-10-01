@@ -44,7 +44,7 @@
             cursor: pointer;
             font-size: 18px;
             box-sizing: border-box; /* Ensure padding doesn't affect width */
-            z-index: 5;
+            z-index: 100;
         }
         .ar-button-new{
             position: fixed;
@@ -65,11 +65,22 @@
             }
         }
         .control {
-            width: 100%;
+            width: 100vw;
             display: flex;
             flex-direction: column;
             justify-content: flex-start;
             align-items: center;
+        }
+        #ar-button-new{
+            position: absolute;
+            top: 0;
+            right: 0;
+        }
+        #back-btn{
+            position: absolute;
+            top: 0;
+            left: 0;
+            display: none;
         }
     </style>
 </head>
@@ -94,6 +105,7 @@
             </button>
         </model-viewer>
     </div>
+    <button id="back-btn">Назад</button>
     <button id="open-camera-btn">Открыть Камеру</button>
     <button id="congratulate-btn" style="display: none;">Поздравить</button>
     <div id="camera-container">
@@ -110,7 +122,9 @@
             disable-pan
             max-camera-orbit="auto 90deg auto"
             style="display: none;"> <!-- Скрываем модель по умолчанию -->
-
+            <button slot="ar-button" id="ar-button-new">
+                AR режим
+            </button>
         </model-viewer>
     </div>
 
@@ -130,6 +144,7 @@
                 videoElement.srcObject = stream;
                 control.style.display = 'none'
                 openCameraButton.style.display = 'none'
+                backВtn.style.display = 'block'; 
                 cameraContainer.style.display = 'block';
                 modelViewer.style.display = 'block'; // Показываем модель
                 congratulateButton.style.display = 'block'; // Показываем кнопку "Поздравить"
@@ -254,7 +269,31 @@
             }
         }
 
+        const backВtn = document.getElementById('back-btn');
+        backВtn.onclick = () => {
+            control.style.display = 'flex'
+            openCameraButton.style.display = 'block'
+            cameraContainer.style.display = 'none';
+            modelViewer.style.display = 'none'; 
+            congratulateButton.style.display = 'none'; 
+            backВtn.style.display = 'none'; 
+        }
 
+        const arBtn = document.querySelector('ar-button-new');
+        arBtn.onclick = () => {
+            modelViewer.enterAR(); // Активируем AR режим
+        }
+
+        const pageReloaded = localStorage.getItem('pageReloaded');
+
+        if (!pageReloaded) {
+            localStorage.setItem('pageReloaded', 'true'); // Устанавливаем флаг
+
+            // Перезагрузка страницы через 1 секунду
+            setTimeout(() => {
+                location.reload();
+            }, 1);
+        }
     </script>
 </body>
 </html>
