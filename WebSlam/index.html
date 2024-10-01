@@ -46,6 +46,12 @@
             box-sizing: border-box; /* Ensure padding doesn't affect width */
             z-index: 5;
         }
+        .ar-button-new{
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            left: unset;
+        }
         #ar-button {
             display: none;
         }
@@ -104,9 +110,7 @@
             disable-pan
             max-camera-orbit="auto 90deg auto"
             style="display: none;"> <!-- Скрываем модель по умолчанию -->
-            <button slot="ar-button" id="ar-button">
-                
-              </button>
+
         </model-viewer>
     </div>
 

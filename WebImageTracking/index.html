@@ -246,10 +246,28 @@
     // Flag to track if the target is found
     let targetFound = false;
 
-    // // Previous positions and rotations for smoothing
-    // let previousPositions = [];
-    // let previousRotations = [];
-    // const smoothingFactor = 7; // Number of frames to average for smoothing
+    function addPlayTextOverlay() {
+      const overlay = document.createElement('div');
+        overlay.textContent = 'Нажмите для воспроизведения';
+        overlay.className = 'video-overlay-hint'; 
+        overlay.style.position = 'fixed';
+        overlay.style.top = '50%';
+        overlay.style.left = '50%';
+        overlay.style.transform = 'translate(-50%, -50%)';
+        overlay.style.color = 'white';
+        overlay.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
+        overlay.style.padding = '10px';
+        overlay.style.borderRadius = '5px';
+        overlay.style.textAlign = 'center'; 
+        overlay.style.whiteSpace = 'nowrap';
+        document.body.appendChild(overlay);
+    }
+    function removePlayTextOverlay() {
+        const overlay = document.querySelector('.video-overlay-hint'); // Находим элемент по классу
+        if (overlay) {
+            document.body.removeChild(overlay); // Удаляем элемент
+        }
+    }
 
 
     const targetEl = document.querySelector('a-entity[mindar-image-target]');
@@ -258,6 +276,8 @@
       if (!targetFound) {
           console.log('Target Found!');
           targetFound = true;
+
+          addPlayTextOverlay()
 
           const audio = document.getElementById('myAudio'); // Извлекаем элемент аудио из разметки
 
@@ -272,6 +292,8 @@
 
                   // Скрываем текст
                   guideTextEl.style.opacity = 0;
+
+                  removePlayTextOverlay()
               } catch (error) {
                   console.error('Ошибка при воспроизведении медиа:', error);
                   if (error.name === 'NotAllowedError') {
@@ -286,6 +308,8 @@
           // Обработчики окончания воспроизведения
           video.addEventListener('ended', handleMediaEnd);
           audio.addEventListener('ended', handleMediaEnd);
+      } else {
+        removePlayTextOverlay()
       }
   });
 
