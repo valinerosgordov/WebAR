@@ -144,7 +144,7 @@
       <!-- <video id="myVideo" preload="metadata" webkit-playsinline playsinline crossorigin="anonymous" type="video/mp4" >
         <source src="konti.mp4" type="video/mp4">
       </video>  -->
-      <video id="myVideo" preload="metadata" loop muted autoplay playsinline webkit-playsinline crossorigin="anonymous" type="video/mp4">
+      <video id="myVideo" preload="metadata" loop muted playsinline webkit-playsinline crossorigin="anonymous" type="video/mp4">
         <source src="konti.mp4" type="video/mp4">
         Ваш браузер не поддерживает видео.
     </video>
@@ -283,6 +283,8 @@
 
           const playMedia = async () => {
               try {
+
+                  video.setAttribute('autoplay', 'true');
                   // Запускаем аудио и видео
                   const audioPromise = audio.play();
                   const videoPromise = video.play();
