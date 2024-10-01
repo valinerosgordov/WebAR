@@ -3,143 +3,150 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KontiSlam</title>
+    <title>AR с Камерой и 3D Моделью</title>
     <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
-    </head>
-    <body>
-     <div class="wrapper">
-        <div class="wrapper-model">
-            <div class="loading">loading...</div>
-            <model-viewer id="modelViewer" 
-                src="3d/1.glb"  
-                ios-src="3d/1.usdz" 
-                alt="A 3D model"
-                ar ar-modes="scene-viewer quick-look"
-                environment-image="neutral"
-                camera-controls
-                ar-scale="auto"
-                touch-action="pan-y"
-                disable-pan
-                max-camera-orbit="auto 90deg auto"
-                 
-                >
-                <button slot="ar-button">
-                    Разместить Деда мороза
-                </button>
-            </model-viewer>
-        </div>
-        <div class="wrapper-button">
-            <div id="ar-buttons">
-                <button id="store-btn">Магазин Konti</button>
-                <button id="download-btn">Скачать Стикеры</button>
-                <button id="share-btn">Поделиться Ссылкой</button>
-                <button class="btn-active-audio">
-                    Поздравить
-                </button>
-            </div>
-        </div>
-     </div>
+    <style>
+        body { margin: 0; display: flex; flex-direction: column; align-items: center; }
+        #camera-container { position: relative; width: 100%; max-width: 600px; }
+        video { width: 100%; max-width: 600px; }
+        model-viewer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+        #open-camera-btn, #congratulate-btn { margin: 10px; }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            box-sizing: border-box; /* Ensure padding doesn't affect width */
+        }
+    </style>
+</head>
+<body>
+    <button id="open-camera-btn">Открыть Камеру</button>
+    <button id="congratulate-btn" style="display: none;">Поздравить</button>
+    <div id="camera-container">
+        <video id="video" autoplay playsinline></video>
+        <model-viewer id="modelViewer" 
+            src="3d/1.glb"  
+            ios-src="3d/1.usdz" 
+            alt="A 3D model"
+            ar ar-modes="scene-viewer quick-look"
+            environment-image="neutral"
+            camera-controls
+            ar-scale="auto"
+            touch-action="pan-y"
+            disable-pan
+            max-camera-orbit="auto 90deg auto"
+            style="display: none;"> <!-- Скрываем модель по умолчанию -->
+        </model-viewer>
+    </div>
+
     <script>
+        const openCameraButton = document.getElementById('open-camera-btn');
+        const congratulateButton = document.getElementById('congratulate-btn');
+        const videoElement = document.getElementById('video');
         const modelViewer = document.getElementById('modelViewer');
 
-        const storeВtn = document.getElementById('store-btn')
-        const downloadВtn = document.getElementById('download-btn')
-        const shareВtn = document.getElementById('share-btn')
-
-        //? Button: Магазин Konti (Opens store page)
-        storeВtn.onclick = () => {
-            window.location.href = 'https://kontirus.ru';
-        }
-
-        //? Скачать Стикеры (Download stickers file)
-        downloadВtn.onclick = () => {
-            const link = document.createElement('a');
-            link.href = 'https://t.me/addstickers/KontiNewyear';
-            link.click();
-        }
-
-        //? Поделиться Ссылкой (Share current page link)
-        shareВtn.onclick = async () => {
-            const shareData = {
-                title: 'Check out this AR experience',
-                text: 'View this AR model in 3D and AR!',
-                url: window.location.href
-            };
+        openCameraButton.onclick = async () => {
             try {
-                await navigator.share(shareData);
-            } catch (err) {
-                alert('Sharing failed: ' + err.message);
-            }
-        } 
-
-        //? Отображение загрузки
-        modelViewer.addEventListener("model-visibility", event => {
-            if (event.detail.visible) {
-                document.querySelector('.loading').style.display = 'none'
-            }
-        });
-
-        //? ar-status - не работает
-        modelViewer.addEventListener("ar-status", event => {
-            console.log(event)
-        });
-
-
-        //? Кнопка запускающие audio и AR
-        const btn = document.querySelector('.btn-active-audio')
-        btn.onclick = async () => {
-            try {
-                btn.style.pointerEvents = "none";
-                await startPlayAudio() 
-                // modelViewer.play()
-                //modelViewer.activateAR()
+                const stream = await navigator.mediaDevices.getUserMedia({
+                    video: { facingMode: 'environment' } // Для задней камеры
+                });
+                videoElement.srcObject = stream;
+                modelViewer.style.display = 'block'; // Показываем модель
+                congratulateButton.style.display = 'block'; // Показываем кнопку "Поздравить"
             } catch (error) {
-                console.error(error)
+                console.error('Ошибка при доступе к камере:', error);
             }
-        }
+        };
 
-        //? Функция воспроизведения audio
-        const startPlayAudio = async () => {
-            try {
-                const response = await fetch('https://arplatov-6e62e-default-rtdb.firebaseio.com/baseNames.json')
-                const {Names} = await response.json();
-                
-                const url = window.location.href
-                const newurl = url.split("?")
-                const idx = newurl[newurl.length-1]
-                const soundname = Names[idx]?.sound
+        congratulateButton.onclick = async () => {
+            // Запускаем анимацию модели и аудио параллельно
+            modelViewer.play();
+            congratulateButton.style.pointerEvents = 'none'
+            await playAudioSequence();
+            modelViewer.pause(); // Останавливаем анимацию модели после воспроизведения аудио
+            congratulateButton.style.pointerEvents = 'auto'
+        };
 
-                const playSound = (soundname) =>{
-                    let audioStart = new Audio(`/slam/firstPart.wav`);
-                    let audioName = new Audio(`/slam/audio/speech/${soundname}`);
-                    let audioFinaly = new Audio(`/slam/secondPart.wav`);
-                
-                    audioStart.onloadedmetadata = () => {
-                        let durationStart = (audioStart.duration*1000) + 1000
-                        audioStart.play(); 
-                        modelViewer.play()
-                        setTimeout(() => {
-                            let durationName = (audioName.duration*1000) + 200
-                            audioName.play(); 
-                            setTimeout(() => {
-                                let durationFinaly = (audioFinaly.duration*1000) + 200
-                                audioFinaly.play(); 
-                                setTimeout(() => {
-                                    btn.style.pointerEvents = "auto";
-                                    modelViewer.pause()
-                                }, durationFinaly) 
-                            }, durationName)  
-                        }, durationStart)                 
-                    }
+        let audioFile;
+        const playAudioSequence = async () => {
+            const audioFiles = [
+                '/slam/firstPart.wav',
+                `/slam/audio/speech/${audioFile}`, // Замените на правильный путь к звуку
+                '/slam/secondPart.wav'
+            ];
+            
+            for (const file of audioFiles) {
+                const audio = new Audio(file);
+                await new Promise((resolve) => {
+                    audio.onended = resolve;
+                    audio.play();
+                });
+            }
+        };
+
+
+
+        
+
+
+
+
+
+        async function getSound  () {
+            function getQueryParametersAsArray() {
+                const params = new URLSearchParams(window.location.search);
+                const queryParamsArray = [];
+
+                for (const [key, value] of params.entries()) {
+                    queryParamsArray.push({ key, value });
                 }
 
-                playSound(soundname)
-                
-            } catch (error) {
-                console.error('Error fetching Names:', error);
+                return queryParamsArray[0]?.key;
             }
+
+
+            async function getElementFromBaseNames(index) {
+                const url = 'https://arplatov-6e62e-default-rtdb.firebaseio.com/baseNames.json';
+
+                try {
+                    const response = await fetch(url);
+                    
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+
+                    const data = await response.json();
+                    const names = data.Names;
+
+                    // Проверка на существование элемента по индексу
+                    if (names && index >= 0 && index < names.length) {
+                        return names[index];
+                    } else {
+                        throw new Error('Index out of bounds or Names array is empty');
+                    }
+                } catch (error) {
+                    console.error('Error fetching base names:', error);
+                }
+            }
+
+            // Пример использования
+            const index = getQueryParametersAsArray(); // Замените на нужный индекс
+            getElementFromBaseNames(index).then(element => {
+                if (element) {
+                    audioFile = element.sound
+                    console.log(audioFile)
+                }
+            });
         }
+
+        getSound()
+
+
+
 
 
     </script>
