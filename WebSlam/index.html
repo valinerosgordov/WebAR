@@ -6,11 +6,35 @@
     <title>AR с Камерой и 3D Моделью</title>
     <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
     <style>
-        body { margin: 0; display: flex; flex-direction: column; align-items: center; }
-        #camera-container { position: relative; width: 100%; max-width: 600px; }
-        video { width: 100%; max-width: 600px; }
+        body { 
+            margin: 0; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            width: 100vw; 
+            height: 100vh;
+            max-width: 100vw; 
+            max-height: 100vh;
+            overflow: hidden;
+        }
+        #camera-container { 
+            position: relative; 
+            width: 100vw; 
+            height: 100vh;
+            display: none;
+        }
+        video { 
+            width: 100%; 
+            height: 100%; 
+            object-fit: cover;
+        }
         model-viewer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
-        #open-camera-btn, #congratulate-btn { margin: 10px; }
+        #open-camera-btn, #congratulate-btn { 
+            position: fixed;
+            left: 50%;
+            bottom: 20px;
+            transform: translateX(-50%);
+        }
         button {
             background-color: #007bff;
             color: white;
@@ -18,12 +42,52 @@
             padding: 10px;
             border-radius: 5px;
             cursor: pointer;
-            font-size: 16px;
+            font-size: 18px;
             box-sizing: border-box; /* Ensure padding doesn't affect width */
+            z-index: 5;
+        }
+        #ar-button {
+            display: none;
+        }
+        .btn {
+            margin-bottom: 10px;
+            box-shadow: 4px 4px 4px rgba(0, 0, 0, 0.25);
+        }
+        @media screen and (max-width: 440px) {
+            .btn{
+                width: 70%;
+            }
+        }
+        .control {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: center;
         }
     </style>
 </head>
 <body>
+    <div class="control">
+        <button id="btn-shareВtn" class="btn">Поделиться</button>
+        <button id="btn-downloadВtn" class="btn">СТИКЕРЫ</button>
+        <button id="btn-storeВtn" class="btn">Магазин Konti</button>
+        <model-viewer id="modelViewerDefault" 
+            src="3d/1.glb"  
+            ios-src="3d/1.usdz" 
+            alt="A 3D model"
+            ar ar-modes="scene-viewer quick-look"
+            environment-image="neutral"
+            camera-controls
+            ar-scale="auto"
+            touch-action="pan-y"
+            disable-pan
+            max-camera-orbit="auto 90deg auto">
+            <button slot="ar-button" id="ar-button">
+                
+            </button>
+        </model-viewer>
+    </div>
     <button id="open-camera-btn">Открыть Камеру</button>
     <button id="congratulate-btn" style="display: none;">Поздравить</button>
     <div id="camera-container">
@@ -40,12 +104,17 @@
             disable-pan
             max-camera-orbit="auto 90deg auto"
             style="display: none;"> <!-- Скрываем модель по умолчанию -->
+            <button slot="ar-button" id="ar-button">
+                
+              </button>
         </model-viewer>
     </div>
 
     <script>
         const openCameraButton = document.getElementById('open-camera-btn');
         const congratulateButton = document.getElementById('congratulate-btn');
+        const cameraContainer = document.getElementById('camera-container');
+        const control = document.querySelector('.control')
         const videoElement = document.getElementById('video');
         const modelViewer = document.getElementById('modelViewer');
 
@@ -55,6 +124,9 @@
                     video: { facingMode: 'environment' } // Для задней камеры
                 });
                 videoElement.srcObject = stream;
+                control.style.display = 'none'
+                openCameraButton.style.display = 'none'
+                cameraContainer.style.display = 'block';
                 modelViewer.style.display = 'block'; // Показываем модель
                 congratulateButton.style.display = 'block'; // Показываем кнопку "Поздравить"
             } catch (error) {
@@ -66,9 +138,11 @@
             // Запускаем анимацию модели и аудио параллельно
             modelViewer.play();
             congratulateButton.style.pointerEvents = 'none'
+            congratulateButton.style.display = 'none'
             await playAudioSequence();
             modelViewer.pause(); // Останавливаем анимацию модели после воспроизведения аудио
             congratulateButton.style.pointerEvents = 'auto'
+            congratulateButton.style.display = 'block'
         };
 
         let audioFile;
@@ -147,6 +221,34 @@
 
 
 
+        const shareВtn = document.getElementById('btn-shareВtn');
+        const downloadВtn = document.getElementById('btn-downloadВtn');
+        const storeВtn = document.getElementById('btn-storeВtn');
+
+        //? Button: Магазин Konti (Opens store page)
+        storeВtn.onclick = () => {
+            window.location.href = 'https://kontirus.ru/';
+        }
+
+        //? Скачать Стикеры (Download stickers file)
+        downloadВtn.onclick = () => {
+            const link = document.createElement('a');
+            link.href = 'https://t.me/addstickers/KontiNewyear';
+            link.click();
+        }
+        //? Поделиться Ссылкой (Share current page link)
+        shareВtn.onclick = async () => {
+            const shareData = {
+                title: 'Check out this AR experience',
+                text: 'View this AR model in 3D and AR!',
+                url: window.location.href
+            };
+            try {
+                await navigator.share(shareData);
+            } catch (err) {
+                alert('Sharing failed: ' + err.message);
+            }
+        }
 
 
     </script>
