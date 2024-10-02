@@ -208,130 +208,129 @@
         showError("Не удалось получить доступ к камере.");
       });
 
-let targetFound = false;
+    let targetFound = false;
 
-const addPlayTextOverlay = () => {
-  const overlay = document.createElement('div');
-  overlay.textContent = 'Нажмите для воспроизведения';
-  overlay.className = 'video-overlay-hint';
-  overlay.style.position = 'fixed';
-  overlay.style.top = '50%';
-  overlay.style.left = '50%';
-  overlay.style.transform = 'translate(-50%, -50%)';
-  overlay.style.color = 'white';
-  overlay.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
-  overlay.style.padding = '10px';
-  overlay.style.borderRadius = '5px';
-  overlay.style.textAlign = 'center';
-  overlay.style.whiteSpace = 'nowrap';
-  document.body.appendChild(overlay);
-};
+    const addPlayTextOverlay = () => {
+      const overlay = document.createElement('div');
+      overlay.textContent = 'Нажмите для воспроизведения';
+      overlay.className = 'video-overlay-hint';
+      overlay.style.position = 'fixed';
+      overlay.style.top = '50%';
+      overlay.style.left = '50%';
+      overlay.style.transform = 'translate(-50%, -50%)';
+      overlay.style.color = 'white';
+      overlay.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
+      overlay.style.padding = '10px';
+      overlay.style.borderRadius = '5px';
+      overlay.style.textAlign = 'center';
+      overlay.style.whiteSpace = 'nowrap';
+      document.body.appendChild(overlay);
+    };
 
-const removePlayTextOverlay = () => {
-  const overlay = document.querySelector('.video-overlay-hint');
-  if (overlay) {
-    document.body.removeChild(overlay);
-  }
-};
-
-const smoothTransform = (entity) => {
-  const targetPosition = new THREE.Vector3(0, 0, 0);
-  const fixedSize = new THREE.Vector3(1.5, 1.34, 0);
-  entity.object3D.scale.lerp(fixedSize, 0.1); // Smoother scaling
-  entity.object3D.position.lerp(targetPosition, 0.1); // Smoother position
-  // You can optionally add quaternion smoothing if necessary
-};
-
-sceneEl.addEventListener('render-target-loaded', () => {
-  let lastUpdate = Date.now();
-  sceneEl.addEventListener('tick', () => {
-    const now = Date.now();
-    if (targetFound && now - lastUpdate > 5000) {
-      smoothTransform(videoPlane);
-      lastUpdate = now;
-    }
-  });
-});
-
-const targetEl = document.querySelector('a-entity[mindar-image-target]');
-targetEl.addEventListener('targetFound', async () => {
-  if (!targetFound) {
-    console.log('Target Found!');
-    targetFound = true;
-    addPlayTextOverlay();
-
-    const audio = document.getElementById('myAudio');
-
-    const playMedia = async () => {
-      try {
-        video.setAttribute('autoplay', 'true');
-        const audioPromise = audio.play();
-        const videoPromise = video.play();
-        await Promise.all([audioPromise, videoPromise]);
-        guideTextEl.style.opacity = 0;
-        removePlayTextOverlay();
-      } catch (error) {
-        console.error('Ошибка при воспроизведении медиа:', error);
-        if (error.name === 'NotAllowedError') {
-          showError("Пожалуйста, разрешите воспроизведение аудио.");
-        }
+    const removePlayTextOverlay = () => {
+      const overlay = document.querySelector('.video-overlay-hint');
+      if (overlay) {
+        document.body.removeChild(overlay);
       }
     };
 
-    document.body.addEventListener('click', playMedia, { once: true });
-    video.addEventListener('ended', handleMediaEnd);
-    audio.addEventListener('ended', handleMediaEnd);
-  } else {
-    removePlayTextOverlay();
-  }
-});
+    const smoothTransform = (entity) => {
+      const targetPosition = new THREE.Vector3(0, 0, 0);
+      const fixedSize = new THREE.Vector3(1.5, 1.34, 0);
+      entity.object3D.scale.lerp(fixedSize, 0.1); // Smoother scaling
+      entity.object3D.position.lerp(targetPosition, 0.1); // Smoother position
+    };
 
-const handleMediaEnd = () => {
-  targetEl.parentNode.removeChild(targetEl);
-  console.log("Аудио и видео воспроизведены полностью.");
-  popupEl.style.display = 'block';
-  video.removeEventListener('ended', handleMediaEnd);
-  audio.removeEventListener('ended', handleMediaEnd);
-};
+    sceneEl.addEventListener('render-target-loaded', () => {
+      let lastUpdate = Date.now();
+      sceneEl.addEventListener('tick', () => {
+        const now = Date.now();
+        if (targetFound && now - lastUpdate > 5000) {
+          smoothTransform(videoPlane);
+          lastUpdate = now;
+        }
+      });
+    });
 
-sceneEl.addEventListener('mindar-image-track', (event) => {
-  const isTracking = event.detail.tracked;
-  if (isTracking && !targetFound) {
-    video.currentTime = 0;
-    targetFound = true;
-  } else if (!isTracking && targetFound) {
-    targetFound = false;
-  }
-});
+    const targetEl = document.querySelector('a-entity[mindar-image-target]');
+    targetEl.addEventListener('targetFound', async () => {
+      if (!targetFound) {
+        console.log('Target Found!');
+        targetFound = true;
+        addPlayTextOverlay();
 
-submitButton.addEventListener('click', () => {
-  const text = userInput.value.trim();
-  if (!text) {
-    showError("Пожалуйста, введите ваше имя!");
-    return;
-  }
-  console.log("User entered:", text);
-  popupEl.style.display = 'none';
-  redirectWebSlam(text);
-});
+        const audio = document.getElementById('myAudio');
 
-const redirectWebSlam = async (userName) => {
-  const nextBtn = document.querySelector('.nextBtn');
+        const playMedia = async () => {
+          try {
+            video.setAttribute('autoplay', 'true');
+            const audioPromise = audio.play();
+            const videoPromise = video.play();
+            await Promise.all([audioPromise, videoPromise]);
+            guideTextEl.style.opacity = 0;
+            removePlayTextOverlay();
+          } catch (error) {
+            console.error('Ошибка при воспроизведении медиа:', error);
+            if (error.name === 'NotAllowedError') {
+              showError("Пожалуйста, разрешите воспроизведение аудио.");
+            }
+          }
+        };
 
-  try {
-    const response = await fetch('https://arplatov-6e62e-default-rtdb.firebaseio.com/baseNames.json');
-    const { Names } = await response.json();
-    const arrayUsers = Names;
+        document.body.addEventListener('click', playMedia, { once: true });
+        video.addEventListener('ended', handleMediaEnd);
+        audio.addEventListener('ended', handleMediaEnd);
+      } else {
+        removePlayTextOverlay();
+      }
+    });
 
-    const idxName = arrayUsers.findIndex(i => i.name === userName);
-    const url = `https://konti.digitalmarker.ru/slam?${idxName}`;
-    nextBtn.href = url;
-    window.location = url;
+    const handleMediaEnd = () => {
+      targetEl.parentNode.removeChild(targetEl);
+      console.log("Аудио и видео воспроизведены полностью.");
+      popupEl.style.display = 'block';
+      video.removeEventListener('ended', handleMediaEnd);
+      audio.removeEventListener('ended', handleMediaEnd);
+    };
 
-  } catch (error) {
-    console.error('Error fetching Names:', error);
-  }
-};
-</script>
+    sceneEl.addEventListener('mindar-image-track', (event) => {
+      const isTracking = event.detail.tracked;
+      if (isTracking && !targetFound) {
+        video.currentTime = 0;
+        targetFound = true;
+      } else if (!isTracking && targetFound) {
+        targetFound = false;
+      }
+    });
+
+    submitButton.addEventListener('click', () => {
+      const text = userInput.value.trim();
+      if (!text) {
+        showError("Пожалуйста, введите ваше имя!");
+        return;
+      }
+      console.log("User entered:", text);
+      popupEl.style.display = 'none';
+      redirectWebSlam(text);
+    });
+
+    const redirectWebSlam = async (userName) => {
+      const nextBtn = document.querySelector('.nextBtn');
+
+      try {
+        const response = await fetch('https://arplatov-6e62e-default-rtdb.firebaseio.com/baseNames.json');
+        const { Names } = await response.json();
+        const arrayUsers = Names;
+
+        const idxName = arrayUsers.findIndex(i => i.name === userName);
+        const url = `https://konti.digitalmarker.ru/slam?${idxName}`;
+        nextBtn.href = url;
+        window.location = url;
+
+      } catch (error) {
+        console.error('Error fetching Names:', error);
+      }
+    };
+  </script>
 </body>
 </html>
