@@ -1,286 +1,188 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>SLamAR</title>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <link type="text/css" rel="stylesheet" href="main.css">
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AR с Камерой и 3D Моделью</title>
     <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
     <style>
-        body {
-            margin: 0;
-            font-family: Arial, sans-serif;
+        body { 
+            margin: 0; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            width: 100vw; 
+            height: 100vh;
+            max-width: 100vw; 
+            max-height: 100vh;
             overflow: hidden;
         }
-        #content {
-            position: fixed;
-            top: 10px;
-            width: 100%;
-            text-align: center;
-            z-index: 10;
+        #camera-container { 
+            position: relative; 
+            width: 100vw; 
+            height: 100vh;
+            display: none;
         }
-        #content button {
-            margin: 5px;
-            padding: 10px 20px;
-            font-size: 16px;
-            border: none;
-            border-radius: 5px;
+        video { 
+            width: 100%; 
+            height: 100%; 
+            object-fit: cover;
+        }
+        model-viewer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+        #open-camera-btn, #congratulate-btn { 
+            position: fixed;
+            left: 50%;
+            bottom: 20px;
+            transform: translateX(-50%);
+        }
+        button {
             background-color: #007bff;
             color: white;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
-        #content button:hover {
-            background-color: #0056b3;
-        }
-        #instruction-text {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: rgba(0, 0, 0, 0.5);
-            color: white;
+            border: none;
             padding: 10px;
             border-radius: 5px;
-            font-size: 16px;
-            display: none;
-            text-align: center;
+            cursor: pointer;
+            font-size: 18px;
+            box-sizing: border-box; /* Ensure padding doesn't affect width */
+            z-index: 5;
         }
-        #container {
+        .ar-button-new{
             position: fixed;
+            bottom: 20px;
+            right: 20px;
+            left: unset;
+        }
+        #ar-button {
+            display: none;
+        }
+        .btn {
+            margin-bottom: 10px;
+            box-shadow: 4px 4px 4px rgba(0, 0, 0, 0.25);
+        }
+        @media screen and (max-width: 440px) {
+            .btn{
+                width: 70%;
+            }
+        }
+        .control {
             width: 100%;
-            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: center;
         }
     </style>
 </head>
 <body>
-    <div id="content">
-        <button type="button" id="place-button">Разместить</button>
+    <div class="control">
+        <model-viewer id="modelViewerDefault" 
+            src="3d/1.glb"  
+            ios-src="3d/1.usdz" 
+            alt="A 3D model"
+            ar ar-modes="scene-viewer quick-look"
+            environment-image="neutral"
+            camera-controls
+            ar-scale="auto"
+            touch-action="pan-y"
+            disable-pan
+            max-camera-orbit="auto 90deg auto">
+            <button slot="ar-button" id="ar-button"></button>
+        </model-viewer>
     </div>
-    <div id="container"></div>
-    <div id="instruction-text">Наведите камеру на горизонтальную плоскость</div>
+    <button id="open-camera-btn">Открыть Камеру</button>
+    <button id="congratulate-btn" style="display: none;">Поздравить</button>
+    <div id="camera-container">
+        <video id="video" autoplay playsinline></video>
+        <model-viewer id="modelViewer" 
+            src="3d/1.glb"  
+            ios-src="3d/1.usdz" 
+            alt="A 3D model"
+            ar ar-modes="scene-viewer quick-look"
+            environment-image="neutral"
+            camera-controls
+            ar-scale="auto"
+            touch-action="pan-y"
+            disable-pan
+            max-camera-orbit="auto 90deg auto"
+            style="display: none;"> <!-- Скрываем модель по умолчанию -->
+        </model-viewer>
+    </div>
 
-    <!-- Model Viewer for Cross-Platform AR Support -->
-    <model-viewer
-        id="ar-viewer"
-        src="1.glb"
-        alt="A 3D model of an object"
-        ar
-        ar-modes="scene-viewer quick-look"
-        camera-controls
-        style="display:none; width: 100%; height: 100%;">
-    </model-viewer>
+    <script>
+        const openCameraButton = document.getElementById('open-camera-btn');
+        const congratulateButton = document.getElementById('congratulate-btn');
+        const cameraContainer = document.getElementById('camera-container');
+        const control = document.querySelector('.control');
+        const videoElement = document.getElementById('video');
+        const modelViewer = document.getElementById('modelViewer');
 
-    <script type="module">
-        import * as THREE from './build/three.module.js';
-        import { ARButton } from './jsm/webxr/ARButton.js';
-        import { OrbitControls } from './jsm/controls/OrbitControls.js';
-        import { GLTFLoader } from './jsm/loaders/GLTFLoader.js';
-        import { RGBELoader } from './jsm/loaders/RGBELoader.js';
-
-        let container, camera, scene, renderer, controller;
-        let reticle, pmremGenerator, current_object, controls, isAR = false, envmap;
-        let hitTestSource = null;
-        let hitTestSourceRequested = false;
-
-        init();
-        animate();
-
-        $("#place-button").click(function () {
-            arPlace();
-        });
-
-        function arPlace() {
-            if (reticle.visible) {
-                current_object.position.setFromMatrixPosition(reticle.matrix);
-                current_object.visible = true;
-                document.getElementById('instruction-text').style.display = 'none'; // Hide the instruction text
-                console.log("Model placed at: ", current_object.position);
-            } else {
-                console.log("Reticle is not visible. Cannot place the model.");
-            }
-        }
-
-        function loadModel() {
-            new RGBELoader()
-                .setDataType(THREE.UnsignedByteType)
-                .setPath('textures/')
-                .load('photo_studio_01_1k.hdr', function (texture) {
-                    envmap = pmremGenerator.fromEquirectangular(texture).texture;
-                    scene.environment = envmap;
-                    texture.dispose();
-                    pmremGenerator.dispose();
-                    render();
-
-                    const loader = new GLTFLoader().setPath('3d/');
-                    loader.load("1.glb", function (glb) {
-                        current_object = glb.scene;
-                        current_object.visible = false; // Initially hidden
-                        scene.add(current_object);
-
-                        const box = new THREE.Box3();
-                        box.setFromObject(current_object);
-                        box.getCenter(controls.target); // Use getCenter instead of center
-
-                        controls.update();
-                        render();
-                    }, undefined, function (error) {
-                        console.error('An error happened during model loading:', error);
-                    });
+        openCameraButton.onclick = async () => {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({
+                    video: { facingMode: 'environment' } // Для задней камеры
                 });
-        }
+                videoElement.srcObject = stream;
+                control.style.display = 'none';
+                openCameraButton.style.display = 'none';
+                cameraContainer.style.display = 'block';
+                modelViewer.style.display = 'block'; // Показываем модель
+                congratulateButton.style.display = 'block'; // Показываем кнопку "Поздравить"
+            } catch (error) {
+                console.error('Ошибка при доступе к камере:', error);
+            }
+        };
 
-        function init() {
-            container = document.createElement('div');
-            document.getElementById("container").appendChild(container);
+        congratulateButton.onclick = async () => {
+            // Запускаем анимацию модели и аудио параллельно
+            modelViewer.play();
+            congratulateButton.style.pointerEvents = 'none';
+            congratulateButton.style.display = 'none';
+            await playAudioSequence();
+            modelViewer.pause(); // Останавливаем анимацию модели после воспроизведения аудио
+            congratulateButton.style.pointerEvents = 'auto';
+            congratulateButton.style.display = 'block';
+        };
 
-            scene = new THREE.Scene();
+        let audioFile;
+        const playAudioSequence = async () => {
+            const audioFiles = [
+                '/slam/firstPart.wav',
+                '/slam/secondPart.wav'
+            ];
+            
+            for (const file of audioFiles) {
+                const audio = new Audio(file);
+                await new Promise((resolve) => {
+                    audio.onended = resolve;
+                    audio.play();
+                });
+            }
+        };
 
-            camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.001, 200);
-            camera.position.set(0, 1.6, 3); // Adjust camera position
+        async function getSound() {
+            function getQueryParametersAsArray() {
+                const params = new URLSearchParams(window.location.search);
+                const queryParamsArray = [];
 
-            const directionalLight = new THREE.DirectionalLight(0xdddddd, 1);
-            directionalLight.position.set(0, 0, 1).normalize();
-            scene.add(directionalLight);
+                for (const [key, value] of params.entries()) {
+                    queryParamsArray.push({ key, value });
+                }
 
-            const ambientLight = new THREE.AmbientLight(0x222222);
-            scene.add(ambientLight);
+                return queryParamsArray[0]?.key;
+            }
 
-            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-            renderer.setPixelRatio(window.devicePixelRatio);
-            renderer.setSize(window.innerWidth, window.innerHeight);
-            renderer.xr.enabled = true;
-            container.appendChild(renderer.domElement);
-
-            pmremGenerator = new THREE.PMREMGenerator(renderer);
-            pmremGenerator.compileEquirectangularShader();
-
-            controls = new OrbitControls(camera, renderer.domElement);
-            controls.addEventListener('change', render);
-            controls.minDistance = 2;
-            controls.maxDistance = 10;
-            controls.target.set(0, 0, -0.2);
-            controls.enableDamping = true;
-            controls.dampingFactor = 0.05;
-
-            let options = {
-                requiredFeatures: ['hit-test'],
-                optionalFeatures: ['dom-overlay'],
-                domOverlay: { root: document.getElementById('content') }
-            };
-
-            const arButton = ARButton.createButton(renderer, options);
-            document.body.appendChild(arButton);
-
-            arButton.addEventListener('click', () => {
-                isAR = true;
-                document.getElementById('instruction-text').style.display = 'block'; // Show the instruction text
-                document.getElementById('ar-viewer').style.display = 'none'; // Hide model-viewer
+      
+            // Пример использования
+            const index = getQueryParametersAsArray(); // Замените на нужный индекс
+            getElementFromBaseNames(index).then(element => {
+                if (element) {
+                    audioFile = element.sound;
+                    console.log(audioFile);
+                }
             });
-
-            reticle = new THREE.Mesh(
-                new THREE.RingBufferGeometry(0.15, 0.2, 32).rotateX(-Math.PI / 2),
-                new THREE.MeshBasicMaterial({ color: 0x00ff00 }) // Change reticle color for visibility
-            );
-            reticle.matrixAutoUpdate = false;
-            reticle.visible = false;
-            scene.add(reticle);
-
-            window.addEventListener('resize', onWindowResize, false);
-
-            renderer.domElement.addEventListener('touchstart', onTouchStart, false);
-            renderer.domElement.addEventListener('touchend', onTouchEnd, false);
-            renderer.domElement.addEventListener('touchmove', onTouchMove, false);
-
-            loadModel();  // Load the model initially
         }
 
-        let touchDown, touchX, touchY, deltaX, deltaY;
-
-        function onTouchStart(e) {
-            e.preventDefault();
-            touchDown = true;
-            touchX = e.touches[0].pageX;
-            touchY = e.touches[0].pageY;
-        }
-
-        function onTouchEnd(e) {
-            e.preventDefault();
-            touchDown = false;
-        }
-
-        function onTouchMove(e) {
-            e.preventDefault();
-            if (!touchDown) return;
-
-            deltaX = e.touches[0].pageX - touchX;
-            deltaY = e.touches[0].pageY - touchY;
-            touchX = e.touches[0].pageX;
-            touchY = e.touches[0].pageY;
-
-            rotateObject();
-        }
-
-        function rotateObject() {
-            if (current_object && reticle.visible) {
-                current_object.rotation.y += deltaX / 100;
-            }
-        }
-
-        function onWindowResize() {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
-        }
-
-        function animate() {
-            renderer.setAnimationLoop(render);
-            requestAnimationFrame(animate);
-            controls.update();
-        }
-
-        function render(timestamp, frame) {
-            if (frame && isAR) {
-                const referenceSpace = renderer.xr.getReferenceSpace();
-                const session = renderer.xr.getSession();
-
-                if (!hitTestSourceRequested) {
-                    session.requestReferenceSpace('viewer').then(function (referenceSpace) {
-                        session.requestHitTestSource({ space: referenceSpace }).then(function (source) {
-                            hitTestSource = source;
-                        });
-                    });
-
-                    session.addEventListener('end', function () {
-                        hitTestSourceRequested = false;
-                        hitTestSource = null;
-                        isAR = false;
-                        reticle.visible = false;
-                        document.getElementById("place-button").style.display = "none";
-                        document.getElementById('instruction-text').style.display = 'none'; // Hide the instruction text
-                        document.getElementById('ar-viewer').style.display = 'block'; // Show model-viewer
-                    });
-
-                    hitTestSourceRequested = true;
-                }
-
-                if (hitTestSource) {
-                    const hitTestResults = frame.getHitTestResults(hitTestSource);
-                    if (hitTestResults.length) {
-                        const hit = hitTestResults[0];
-                        document.getElementById("place-button").style.display = "block";
-                        reticle.visible = true;
-                        reticle.matrix.fromArray(hit.getPose(referenceSpace).transform.matrix);
-                    } else {
-                        reticle.visible = false;
-                        document.getElementById("place-button").style.display = "none";
-                    }
-                }
-            }
-
-            renderer.render(scene, camera);
-        }
+        getSound();
     </script>
 </body>
 </html>
